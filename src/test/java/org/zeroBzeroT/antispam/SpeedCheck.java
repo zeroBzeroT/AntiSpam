@@ -93,7 +93,7 @@ public class SpeedCheck {
         spamCheck.isRecurringSpam("1tCJrD24RH9DwFCtpEBPENJ1EbzPRNYsSnu5crtVxVPG1S2hSChGPaqpuO6so5LN1BDobTDzRStP5d5BEWARRofivT30YDng9Vp2ltrD6lUyU40R65fUekEyzTSlx5q7iE02cgzRp1qYmxtrwbIihdOp5C8mFS7OC9AO1cTFTywZvEEIUtp5Ic2358wHZrArcG0bjEdE");
         final long end = System.currentTimeMillis() - start;
         System.out.println("took " + end + "ms");
-        System.out.println("average " + (end / 70) + "ms per check");
+        System.out.println("average " + (end / 69f) + "ms per check");
     }
 
 }
