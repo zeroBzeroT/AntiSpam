@@ -49,6 +49,7 @@ public class SpamCheck {
 
     /**
      * constructor with a given unicode range specification
+     *
      * @param unicodeRanges unicode range class
      */
     public SpamCheck(UnicodeRanges unicodeRanges) {
@@ -57,6 +58,7 @@ public class SpamCheck {
 
     /**
      * distance between two sentences
+     *
      * @param x first sentence
      * @param y second sentence
      * @return the minimum number of single-character edits
@@ -72,7 +74,7 @@ public class SpamCheck {
                     dp[i][j] = i;
                 } else {
                     dp[i][j] = min(dp[i - 1][j - 1] + costOfSubstitution(x.charAt(i - 1), y.charAt(j - 1)),
-                            dp[i - 1][j] + 1, dp[i][j - 1] + 1);
+                        dp[i - 1][j] + 1, dp[i][j - 1] + 1);
                 }
             }
         }
@@ -82,6 +84,7 @@ public class SpamCheck {
 
     /**
      * cost of single char substitution
+     *
      * @param a first character
      * @param b second character
      * @return 0 or 1
@@ -92,6 +95,7 @@ public class SpamCheck {
 
     /**
      * minimum of all given numbers
+     *
      * @param numbers given numbers
      * @return minimum value of the numbers
      */
@@ -101,30 +105,39 @@ public class SpamCheck {
 
     /**
      * Checks message for spam
+     *
      * @param message The message sent by the player
      * @return is the message spam
      */
     public boolean isRecurringSpam(String message) {
+        // from [minMessageLength] character length
+        if (message.length() < minMessageLength)
+            return false;
+
         // use unicode ranges to sanitize text
         String saniMsg = unicodeRanges.sanitizeText(message, minMessageLength);
-
-        // from [minMessageLength] character length
-        if (saniMsg.length() < minMessageLength)
-            return false;
 
         // remove long random numbers
         saniMsg = saniMsg.replaceAll("\\b\\d{9,}\\b", "");
 
-        // remove hashcodes
+        // remove hashcodes that some use at the start or end of a spam text
         saniMsg = saniMsg.replaceAll("[^a-zA-Z0-9](?=([a-zA-Z]*\\d))\\S{4,}[^a-zA-Z0-9]", "");
 
-        // remove camelcase - why?!?
+        // remove camelcase that some use at the start or end of a spam text - useful?
         saniMsg = saniMsg.replaceAll("[^a-zA-Z0-9](?=([a-z]+[A-Z]+|[A-Z]+[a-z]+){2})\\S{3,}[^a-zA-Z0-9]", "");
 
         // remove non printable chars and spaces
         saniMsg = saniMsg.replaceAll("[\\p{C} ]", "");
 
         saniMsg = saniMsg.toLowerCase();
+
+        if (saniMsg.length() <= 1) {
+            System.out.println("(saniMsg.length() <= 1 for) '" + message + "'");
+            // short message spam
+            return true;
+        }
+
+        System.out.println("saniMsg '" + saniMsg + "'");
 
         int cntDuplicates = 0;
 
@@ -174,6 +187,7 @@ public class SpamCheck {
 
     /**
      * Set the current player count
+     *
      * @param count Current number of Players
      */
     public void setPlayerCount(int count) {
