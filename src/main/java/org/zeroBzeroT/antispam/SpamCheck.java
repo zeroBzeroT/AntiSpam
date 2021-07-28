@@ -11,6 +11,9 @@ public class SpamCheck {
     // number of spam messages that is saved
     static final int maxBadSentencesSaved = 64;
 
+    // minimum "percentage" of whitespace
+    public static double whitespaceFrequency = 0.0625;
+
     // minimum message length before it is beeing checked
     static int minMessageLength = 8;
 
@@ -126,18 +129,26 @@ public class SpamCheck {
         // remove camelcase that some use at the start or end of a spam text - useful?
         saniMsg = saniMsg.replaceAll("[^a-zA-Z0-9](?=([a-z]+[A-Z]+|[A-Z]+[a-z]+){2})\\S{3,}[^a-zA-Z0-9]", "");
 
+        // TODO: move that hack to another method
+        // assume that the end of the text corresponds to one whitespace
+        float whitespace = (saniMsg.length() - saniMsg.replaceAll(" ", "").length() + 1f);
+        float whitespacePercentage = (whitespace / saniMsg.length());
+
+        if (whitespacePercentage < whitespaceFrequency) {
+            //System.out.println(whitespacePercentage + " " + whitespaceFrequency + " " + saniMsg);
+            return true;
+        }
+
         // remove non printable chars and spaces
         saniMsg = saniMsg.replaceAll("[\\p{C} ]", "");
 
         saniMsg = saniMsg.toLowerCase();
 
         if (saniMsg.length() <= 1) {
-            System.out.println("(saniMsg.length() <= 1 for) '" + message + "'");
+            //System.out.println("(saniMsg.length() <= 1 for) '" + message + "'");
             // short message spam
             return true;
         }
-
-        System.out.println("saniMsg '" + saniMsg + "'");
 
         int cntDuplicates = 0;
 
