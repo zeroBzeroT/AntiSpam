@@ -15,10 +15,7 @@ import org.bukkit.event.player.*;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
     static final List<String> whisperCommands = Arrays.asList("tell", "w", "msg", "whisper");
@@ -84,7 +81,7 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
 
             return true;
         } else if (sender instanceof ConsoleCommandSender && cmd.getName().equalsIgnoreCase("showmessages")) {
-            log("showmessages", ChatColor.DARK_PURPLE + "Here comes the messages:");
+            log("showmessages", ChatColor.DARK_PURPLE + "Here comes the last messages:");
 
             for (String oldMessage : new LinkedList<>(spamBotCheck.lastMessages)) {
                 log("showmessages", ChatColor.LIGHT_PURPLE + oldMessage);
@@ -123,13 +120,31 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
             return;
         }
 
-        if (spamBotCheck.isSpam(player, message)) {
+        if(isBot(player)) {
+            return;
+        }
+
+        if (spamBotCheck.isRecurringSpam(message)) {
             event.setCancelled(true);
 
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("spam-talk-message")));
 
             log("onPlayerChatEvent", player.getName() + " message has been discarded.");
         }
+    }
+
+    private boolean isBot(Player player) {
+        // Bots
+        for (String bot : AntiSpam.bots) {
+            if (player.getName().toLowerCase().contentEquals(bot.toLowerCase())) {
+                return true;
+            }
+            if(player.getUniqueId().equals(UUID.fromString(bot))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // whisper spam check
@@ -149,7 +164,7 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
                     return;
                 }
 
-                if (spamBotCheck.isSpam(player, args[2])) {
+                if (spamBotCheck.isRecurringSpam(args[2])) {
                     event.setCancelled(true);
 
                     player.sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("spam-whisper-message")));
@@ -173,6 +188,7 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
         }
     }
 
+    // TODO: add not moved after killing
     private void addNotMoved(Player player) {
         for (String bot : bots) {
             if (bot.toLowerCase().contentEquals(player.getName().toLowerCase())) {

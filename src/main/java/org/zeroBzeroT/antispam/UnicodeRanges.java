@@ -4,24 +4,41 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
+@SuppressWarnings("unchecked")
 public class UnicodeRanges {
-    final Plugin plugin;
-
     List<List<Object>> unicodeRanges;
 
     public UnicodeRanges(Plugin plugin) throws IOException, InvalidConfigurationException {
-        this.plugin = plugin;
 
         plugin.saveResource("unicode_ranges.yml", false);
 
         YamlConfiguration config = new YamlConfiguration();
 
         config.load(plugin.getDataFolder() + "/unicode_ranges.yml");
+
+        unicodeRanges = (List<List<Object>>) config.getList("ranges");
+    }
+
+    public UnicodeRanges() throws IOException, InvalidConfigurationException {
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("unicode_ranges.yml");
+
+        InputStreamReader streamReader = new InputStreamReader(Objects.requireNonNull(inputStream), StandardCharsets.UTF_8);
+
+        BufferedReader reader = new BufferedReader(streamReader);
+
+        YamlConfiguration config = new YamlConfiguration();
+
+        config.load(reader);
 
         unicodeRanges = (List<List<Object>>) config.getList("ranges");
     }
@@ -44,7 +61,7 @@ public class UnicodeRanges {
                     break;
                 }
 
-                // All chars from undefined ranges are discarded - That may not be the best idea ;) - With <3 0bOp
+                // All chars from undefined ranges are discarded - That might not be the best idea ;) - With <3 0bOp
             }
         }
 
@@ -55,6 +72,10 @@ public class UnicodeRanges {
             if (maxRange == null || entry.getValue().compareTo(maxRange.getValue()) > 0) {
                 maxRange = entry;
             }
+        }
+
+        if(maxRange==null) {
+            return "";
         }
 
         // only remove the chars from other ranges if the text is long enough afterwards

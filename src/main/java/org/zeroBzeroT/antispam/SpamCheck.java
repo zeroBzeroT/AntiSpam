@@ -1,7 +1,6 @@
 package org.zeroBzeroT.antispam;
 
 import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.io.IOException;
@@ -9,12 +8,22 @@ import java.util.Arrays;
 import java.util.LinkedList;
 
 public class SpamCheck {
+    // number of spam messages that is saved
     static final int maxBadSentencesSaved = 64;
+
+    // minimum message length before it is beeing checked
     static int minMessageLength = 8;
-    // factor of the message difference - TODO: Config vars
+
+    // factor of the message difference
     static double msgDiffFactor = 1d / 5d;
+
+    // maximum duplicated messages to be saved
     static int maxDuplicates = 2;
+
+    // initial number of saved non spam sentences
     static int maxSentencesSaved = 128;
+
+    // increment for the maximum saved sentences per player
     static int perPlayerQueueSizeFactor = 5;
 
     // the last [maxSentencesSaved] chat messages for comparison
@@ -26,6 +35,10 @@ public class SpamCheck {
     // sanitizing message from chars that are from unicode ranges that are only used a few times in that message
     private UnicodeRanges unicodeRanges;
 
+    /**
+     * constructor without a given unicode range specification
+     * the default range specification is used from the resources
+     */
     public SpamCheck(Plugin plugin) {
         try {
             unicodeRanges = new UnicodeRanges(plugin);
@@ -34,8 +47,21 @@ public class SpamCheck {
         }
     }
 
-    // distance between two words - the minimum number of single-character edits
-    static int calculateLevenshtein(String x, String y) {
+    /**
+     * constructor with a given unicode range specification
+     * @param unicodeRanges unicode range class
+     */
+    public SpamCheck(UnicodeRanges unicodeRanges) {
+        this.unicodeRanges = unicodeRanges;
+    }
+
+    /**
+     * distance between two sentences
+     * @param x first sentence
+     * @param y second sentence
+     * @return the minimum number of single-character edits
+     */
+    static int levenshteinDistance(String x, String y) {
         int[][] dp = new int[x.length() + 1][y.length() + 1];
 
         for (int i = 0; i <= x.length(); i++) {
@@ -54,23 +80,31 @@ public class SpamCheck {
         return dp[x.length()][y.length()];
     }
 
+    /**
+     * cost of single char substitution
+     * @param a first character
+     * @param b second character
+     * @return 0 or 1
+     */
     public static int costOfSubstitution(char a, char b) {
         return a == b ? 0 : 1;
     }
 
+    /**
+     * minimum of all given numbers
+     * @param numbers given numbers
+     * @return minimum value of the numbers
+     */
     public static int min(int... numbers) {
         return Arrays.stream(numbers).min().orElse(Integer.MAX_VALUE);
     }
 
-    // Checks message for spam
-    public boolean isSpam(Player p, String message) {
-        // Bots - TODO: UUID - use contains without case
-        for (String bot : AntiSpam.bots) {
-            if (bot.toLowerCase().contentEquals(p.getName().toLowerCase())) {
-                return false;
-            }
-        }
-
+    /**
+     * Checks message for spam
+     * @param message The message sent by the player
+     * @return is the message spam
+     */
+    public boolean isRecurringSpam(String message) {
         // use unicode ranges to sanitize text
         String saniMsg = unicodeRanges.sanitizeText(message, minMessageLength);
 
@@ -101,7 +135,7 @@ public class SpamCheck {
                 continue;
 
             // Levenshtein distance - strings are similar
-            if (calculateLevenshtein(oldMsg, saniMsg) < saniMsg.length() * msgDiffFactor) {
+            if (levenshteinDistance(oldMsg, saniMsg) < saniMsg.length() * msgDiffFactor) {
                 cntDuplicates++;
 
                 if (cntDuplicates >= maxDuplicates)
@@ -129,7 +163,7 @@ public class SpamCheck {
                     continue;
 
                 // Levenshtein distance - strings are similar
-                if (calculateLevenshtein(oldSpam, saniMsg) < saniMsg.length() * msgDiffFactor) {
+                if (levenshteinDistance(oldSpam, saniMsg) < saniMsg.length() * msgDiffFactor) {
                     return true;
                 }
             }
@@ -138,6 +172,10 @@ public class SpamCheck {
         return false;
     }
 
+    /**
+     * Set the current player count
+     * @param count Current number of Players
+     */
     public void setPlayerCount(int count) {
         lastMessages.setSize(Math.max(maxSentencesSaved, count * perPlayerQueueSizeFactor));
     }

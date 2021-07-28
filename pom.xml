@@ -36,6 +36,7 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
+        <!--testSourceDirectory>src/test/java</testSourceDirectory-->
     </build>
 
     <repositories>
@@ -51,6 +52,18 @@
             <artifactId>paper-api</artifactId>
             <version>1.12.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.7.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <version>5.7.2</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
