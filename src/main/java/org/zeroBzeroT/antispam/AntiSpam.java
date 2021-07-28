@@ -38,6 +38,7 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
         SpamCheck.maxSentencesSaved = config.getInt("max-sentences-saved");
         SpamCheck.minMessageLength = config.getInt("min-message-length");
         SpamCheck.perPlayerQueueSizeFactor = config.getInt("per-player-queue-size-factor");
+        SpamCheck.whitespaceFrequency = config.getDouble("whitespace-frequency");
 
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(this, this);
@@ -139,9 +140,9 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
             if (player.getName().toLowerCase().contentEquals(bot.toLowerCase())) {
                 return true;
             }
-            if(player.getUniqueId().equals(UUID.fromString(bot))) {
-                return true;
-            }
+            //if(player.getUniqueId().equals(UUID.fromString(bot))) {
+            //    return true;
+            //}
         }
 
         return false;

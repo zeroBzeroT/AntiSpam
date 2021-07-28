@@ -8,6 +8,7 @@ max-duplicates: 2
 max-sentences-saved: 100
 min-message-length: 8
 per-player-queue-size-factor: 5
+whitespace-frequency: 0.0625
 bots:
 - moooomoooo
 - 6259c4b5-759f-4252-a6f7-d77818e125eb

@@ -1,17 +1,15 @@
 package org.zeroBzeroT.antispam;
 
 import org.bukkit.configuration.InvalidConfigurationException;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.io.IOException;
 
 class SpamCheckTest {
     static SpamCheck spamCheck = null;
 
-    @BeforeAll
-    static void beforeAll() {
+    @BeforeEach
+    void setUp() {
         try {
             final UnicodeRanges unicodeRanges = new UnicodeRanges();
             spamCheck = new SpamCheck(unicodeRanges);
@@ -28,6 +26,7 @@ class SpamCheckTest {
         Assertions.assertTrue(spamCheck.isRecurringSpam("testtesttest"));
         Assertions.assertFalse(spamCheck.isRecurringSpam(""));
         Assertions.assertFalse(spamCheck.isRecurringSpam("testtest"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam(""));
     }
 
     @Test
@@ -35,78 +34,109 @@ class SpamCheckTest {
         Assertions.assertFalse(spamCheck.isRecurringSpam("The gENErATioN oF rAnDomNess CAN be A tYpIcaL TaSk In COmPuteR pROgramMINg. IN StaTIstIcallY THEorY, rAndoMizATioN CAn bE An ImPOrtANT task WITH an APplICATIOn suCh aS sUrVEy SaMPLinG."));
         Assertions.assertFalse(spamCheck.isRecurringSpam("ThE GEnErATioN oF RandoMnEss Can BE A TyPiCAl tAsk iN cOmPutEr proGRAmmiNg. in sTATistIcaLLY tHEoRY, ranDomIzATiON can bE An IMpOrtANt taSk WiTh an aPPlICATIon Such As SUrvEy SAmPliNg."));
         Assertions.assertTrue(spamCheck.isRecurringSpam("THE gENERATIon Of raNdoMneSS can BE a tYpiCAL TASk In cOMpUteR pROgrAMmINg. in StatistICallY Theory, RANDOMIZatION CAn be AN iMPOrTANT TasK wIth AN AppLiCAtIon sucH AS Survey SaMpLIng."));
+        Assertions.assertFalse(spamCheck.isRecurringSpam(""));
     }
 
     @Test
     void testAlphanumericNonsense() {
-        Assertions.assertFalse(spamCheck.isRecurringSpam("BK16jye5U1sq1pLZb2MskZzqVnrRNFLmdX0e0i4nT7xQKixn2FGLUtELduzVGtpE7ocp6PsILL4UNtrxAIC5m2d8aTWN9Z789i5Vel44AMNLpcileMK3NnUV3iD7hlk58l5Pu9QwcJQhtxd0OAWhMW15clpnGWl6GjssGqnHNExubH8euNCbC767djvclXPIkuH6JdkH"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("1obRAb4B60M0lACc36YcCrJIpavTxVh1XXnFMTMHYdWFIgFdBHICP5tgl9zbYBcpnswDQdFw3sDCxIUf9SHPzOacIOP8qaJ59RghLTB8Hg4zUuu9GXzlIhOboMH4THnRRVqjVUQsAYTSR1vswGhkyIDVmC4siTQBzkuSHT8lLfPSPZwSQFvUVNkVQwRSZh9L8IY90FCr"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("DE5gRC7e69o9ulSBrD9geKFVsUROp3QgXrR5h0NWqmgJvJZI5XBHoABZ2fQPFYa2PgQ3U4aiVhJG6Yn5S9c5Us3f4P1WQgRVtaLYMZEObKv0WQpmiOhMiT8Z9Chs7vJJLkMtIbVCQrTzV6h6Bnv1xKhRzOcE0bOeIncL4bNccXSO3s2HzsubmvyTQtzFnfF6sQtoMQ6E"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("G5whkYgyoy5WyueNpUb8WgAp40MI9EXB7R12Y8KgkcS5xUNEw4acF61mFAU8ISQh9lGOA9d997Xu3VwZuDU3U4zFAsFCifJV7H4f6YnabMHmPTBMIkBxY9ZVYqeWUVd6xETTcqoLMEvIu3RAYbJORPllIZDngfPDIMMO2UfY3CO6VLURmfe285ARS9KJ124YOvGhkFve"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("916NBvr6vAFClEGw1QxRtJIaIEkheEglDdDOjet304BGiLYZHYhIffs6wRlMRgNfOoHFc7Jo0ACCYU9Ua2wyAm52hFhqXnd5F9GoQ1rG8QUgvTu4yRl0k33gjj3l9Z6tc3gzsU8Pw70Zpb5jNqOxyrg50nYi7ZAU0nPoBIi2vc0wjx1HGDTOrnBKI5MwTOw25tf1eoqd"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("E01IDZxvl1G6KAMovPj1aegbsjd6FYTAvE0rRzYHN4fXJbxhc2glS1iADpuSKeNyOYlLnqJMxW6B0u7PNebFLxd4ru22vg7QSeZ6ZNJbViAmK6KhJ400Q54H8qTQ37NkpAEQ1kFbn8kKa2Bd2WQrEFNnnlng9nhA3C8mppNbbiRYWXo2daNH8FaKOCfGoMtbMJno8NYW"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("YxeHD40BrtXjnOlKq29VAS7KK3h3EAjSS3tM5WL4F9hcC7LMISTNui2oRlrCbZ3kXFIZ8nv2UJjuPQRRpYW976x95gDTV816Dt7Dk8CgUbf4MvyITTVUTObG6uuiPJSgtTuRmJZRC9mexK3xSsTvDBHal4MxNHOONLIRPxm17oHdRPpD1CvvK1z9hY5Lgddo7SlnvOLu"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("ql85hONgZUj8ZTb0hzYcwEmlyzxQCvm28QPyYfCoEuIl6eWhLNWMX2lRL17LTWzHSTz1YrflvNwz9yojXfZYtZpEzrGabUpXmJxt4lt0GAxnPIA3iRItk4BaASwtOq8ytAnxeeS1FEiuf1GJ8yhU2ejEIyukALurP489ovO1msb4G5GHsZ2d717lEN4p1IXSI4mbx1Hj"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("PGQCyMLQbWbXonofIqdGibKHlyH4hVOYvbMGt5pGSajqSWhVeMr4zEErCPcBjN1xwB1hDQ0IxDZRrv0mmRwyNIkuEKIjiehGKx0VlZhVvOz7FOwVYphszrKFc9mAxYPziSc3GpjjlGENVVbinsbmBlorzd9fjIbuj9QL9FZDkG47D1XoxftGnUk6o4Wxg93tGZdZnss4"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("5CV3lHM8A07qoP9CP2v2zj35hk2E0mitooIj1Jp5YRd9sW55Kk1mNdCcM8PavDekecAH29kW2kfucvmuNheyz4lSYW6NEYBRg4uDWraEDGnxK4wNjbKKYAiYGfewGLSH6FKsgHeErWSJBfnyEcysl2TflGeLsjKoaSfaKlM5076IioGgaJ7E1e6TBHUDllax7ZfqQlWL"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("UXlUJvfC351wzBEQOa5lbErSdmHKzLxTjvGtfkHgUaUHeflwc918MHscU13SEYq8neHfLjxSAcdGjb6bM8zO1iKLq3IlLwoDvw89EjKXsRPanrDiKcDNuBhAUhkQzUiWFl4b3JksDMGSQ7dAtrjJoEoomkvfP6pjuzVGq9kf0RgPpZn1EXzc4O3CSbcOR8R8GrAcYYcj"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("fyWCS0HBGxWW5gKgDXTlLxrEVOzqUU6Q7ux5VfLEhVUHiI1UylEVo9ZMbKGXgQvM45FbZxROoYmKfTU2sT0Hahq60D7uxpSl4dqYMYtJOcddVgXokwbAKpEwGf3y03CaymEUpTnTdAVBj2fukbhCubuP6M0rYiWcC2mB3dfkGmFw0YY0tf7sNSWryEZLgKSwbskOpCa4"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("3hnO54LTpsgKyUi40paEi7mcHl33JgHz4vytMkHvhvspej2NjCEB0swLuWyuwTfRHvy3tqnf0RGqzh7gQK2edRqw1SGh8IQpwWfAqJKuIVwXVzASkuRtT5tdcHhPf5P3NYiYdmqAJS8isCTQzAoOYe6nCyZxBpbVzdTR5HS096PFPF4oJmo4iIRgcN6vaG3EIPYnc4Ni"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("GIoc96ofgcppdLW6TIMBztLywnxnVqtRj44RGYwfb9zyv7Ld9ZPznJKXKyX2GKZ3Kk4J1hSvrLJ4Uwiru8wUI5eRRIifYG8lanEOPnH0Xyp6oyKN17w9lXH6rb7kHdHgOuBHYsMlb0FXY7qnhtEp2uJkI7aiZp5Hxrte6q8wphrXUd3zxKFY4kzd835ovJi4K54KvCNt"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("JXc11E04adquAIC5IBhEZnfTzBak938eif7ThbzVIIrx64uW7VTElEhYGbpqqoVMLQhkSeDPxlVLsxcExnQsIQnAuubCt1qDgzjhjpSXJXDK5NfDymTU61aUdrn12FG03gFOTv2eydd0iryMPG2tCWFL220Rur3QIqZFPLH6YRelTIoOhzJojr8USUyBNWOCsJQRnH8R"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("EbPqKcrqLv8L2x2y6rb2THiPLKhwZlkcneFS66pIxTfUjlKBdQQhSQekrmFV0Oi9JCGojc73s7yokMxttXqVCnWMeFua6wilqikDWAhw63FCSUohTsGpULWrGpdpLFYaSulY7PxHsEKcy9wzDIvwk5tWEfayo03L2g9lnjt5r5dJYBVQU6A3XTQNO8ZyXS1AN5Oz5DOm"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("qRwazKiu1nc1NwcV5U6M9mNvSInVqaTvA9qfnvDomfTfylRdvRkrWBSxdbcBbAFbliE54Pfpm4n6kjR1ttfg1uGg5kC9sgnDKWWtcu85LvcbEQ65nvs2rBh7IA6UoQoLwPScvwTnYUZvIJoepJkTpUIkbAT9Sn1GLvda25VmmcuiCWLvtL0x5kqKz1aKIO6s7I1aDXBj"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("13Tr0pR8om8ixQs5B84c3If69x7nsVCtv3YikfWiaCi5IyrceAnRPEXyyupJSz85eg8NzdijapAE1GtsI1G3YIdYlFmBPvRcVzAsWrqtqUsw3GzLTiT8kSORr1kG2ze45VgOXgOUHgr0w8I0yEfD1jb7DRW7NBcDPWrGsPmuTs8J0PB8O5qBOFI7DCHpftVeF2xxY6kp"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("AerdVh7Lc76JeX18Qe73ZpaY4hewSZl9QTtdEroh6qWCk1KBOPOGOWpMRYuyDVCnGRyPcRmqL4SyU3jDGNvLHSPTxDLtOEvRjp5XL4WuWHA06HP8LDMiTTYWzMFapunq5SiKNWKbtZfYLex6Xb391v3pm3HXQy8dorABtFpXiLnVYkDjE8LtJtGjROFIP13pVlXfj4kr"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("cmml6e3XcPPihN53wpkHcNbKlPNVrWJNsxXjDDDrsUx0uYg68kwBINnBnOESVYE37E1ROwwoWjFbtPsEMO3W7WhS0AWRGepxDUusLNB1yXFfjqPyo507GBUEXS5fzx5sdu8SkUqSSGVAPHjTtHszC4QvPx7qVUwpNf3NSinJGf8z0s0XPPOAF2S5pwgl5FtJbA4fwft3"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("iEIeUD0nAuzFhQ4gMIyK2HD0jtAIcUf4cOMNoZV5ZG00zPdOqswLS7YeOOwXuey2757TswKUdc8rCyR8bPmZIGozX4hvBKUxBSDEtsO589Hy5Tc3MqKXPch3mp3jIZUWfVhIhqI0pEMuWwLo4XqtxReRxcRkgUeB3aauO31O1KCrDVk99scHH7dghCPBOzsnUpopzupl"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("OzWCceJxiOTbaTW45N9csQiWxBfdwdZi0md0NQuUg6egqLDJcqfAcypMQulWKzeEE1mER16MlqH9Z4GwbzZmhEqlnLyNN6GLCvmmZmgxJqTLNesRKHdXqMyqCpeNS6Xdp74TtVg33lCpk3F36xoPmZGbsD28H32HjitKxXnmPiJBMko5iOPixo1ve16o4hg7UWRFSBC4"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("0mip8NQnjHJymihB43XD9zA15JRgZdIEKnuZwlXWHVM7TLstq0dh6J6ZvcGpNHqlQKDed7Qf1kVV4d7PpXnfYu5FR4nYfc0TMxH3UMHvoPIkFFBUBeHSb3RS1GqXRGjuVpcng1k9pE2U2IbobHkBaBVGV9egGxB8U726AIYqS3w9yGlUZux6ctWkcupJx9AsaNI2EGU0"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("o6sz0CEhNY6je2sI6Ka1vcLxYYrSehYvxQf7DTxLKblrR7TvbZo0K0qQBUyUQ4cWmz6EN8CvwnG2v6raIU0OOLp6ToNkzlAY9dh4975xxtvUqJX4qTvq90xes5ufpmULyz4Ww5tb6UzbxiAXvCy8eMXVQlj68F8MH4rS2eidhb6VwjeS7vh1Vo2PmTu53MzZybLC7F90"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("u4kLrfY8ZcROwAaM8lR4VMpKAJpjOU5uPCAfwVPr2FOUSITkS5XOOcrQsl9PJBS8oGTNSassCkZYHvFhu2RKDi3JEWYOeCVvCz4Z13ynINoH12be06d6wgwqK7prOvlb8tf1D2sUShWKWLK2T3vKX33gNMZYxH2JStrXP0jOhzL9tm5dK2dV50esSQppGMy2uD7s9Lyt"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("FbtlkNpnYPBdHHWOwGbeJNrcdYbTJamfPe5BZNMfymV1b736BhAU9reBqc0VFLjgFX7T68TOkBDzplPMnJCUwV0RSZMIk83MNAgxBtpZyuGpurF0PdTxDEp70jL4EGDphVYY01XAdPlIYKIlRH8EADiSoMrA31oknnUhLByCVy1XSZZxRFnNfiyxdMotCDv4Thh3q1bQ"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("hNIsZxb0Llezt5G0FI1dbrOtTdBek9xWiREYAFBz0EzuX8KC2sWFJhXZVvRX4fS2iMst1Nl30ndUA6yp06JchJCiJnQaeE1hj7zMdcIwrvUshsdmFTmGX6vbCgIZvITyeMCvhRl62ZxyrIlGEGdLlfssQG6OK1khAK6US7EmKTSoRABekwClxJE4gkOj6qxh3ygNEkFY"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("4LYe7RG8FAhtA7KvDVRA5KLunsui9YlM7s2HzwdN4yDmaePMHqRP9kf0FosdCkc463TlnSqcWbqYoJtDdNP0tB8wgqVoZAWCYVbvSIgRaFQ7gGjVsNOV5ywBb9PUjxB3WXgpVh1nS3NFmsWfzqunFdRXFsl4r7dgSZKl8cSBnhetLl2hTZctX0U6mDMiO3vUKr5r0lHV"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("Ky7xl6STL1WPwJOcaE1jORhWmC5wzpx8Y1h1zWO9dYjLuGWJzPXNTcRpibmoiuq3Yu9SZL4uffPmNhv4q7lb4fRfoonCb9yyvVX9flQxjj8QTErZceJnE21vMmjxyHzK3NHghGEQbhg0st8ZfWQ8fJCM0sAyXrutTQHHcStchslvVE36rFg6lf7HPVcBb9S5dNFI9ovw"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("MgevheR1D2MliCABYUyyNMx3QA2uhpSpXBjauxDGd8cwa1gybfjcZSi1lzhNqgq93O6sQX0MZPkrjdstqFH4u0BThmqrYDeoNq9QysFxKSPqGFsKL5sFVqmiiXkYJqqKi9MdEdzNMRLHqhbGvR3fPsBqSwG1E7qcVgrMLJEJKEbgFSMMS2RUWczurgxwt0LGV4dTvswe"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("qB0CD9A3mNq1BzLTTtUnn9jDzCE8yK8gFhnG3j0hOKFOqU4xrDldnpWeaVsY2aW8IdXz6ccsgwOet2cHYSnqaVszFv450BdKKbYmH2MtFbL7TYqUAz9F4yfrl0dpiwrpehnynT51tN19OwGSDoXxkfArn3nBMFAhOnad8GKIzJJYlqyQcm78lF5WQQbWG3wOUUsFfXMl"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("KihDiOe9G9Kyp9jhKvrqsLOnTktMJ4KpjeJ7bzefLQlsMrKwvRHY9xeqNR4prGDzSWYFAbFlWgT8Kje4oOG93KBoHnJmhsD87AAbtB0NMT0Gub2C22UXNNNOc3f6kYQO3IQOFB9pxsMNhaEAaoZ3cTbcDZYiUc86RxSZEn6ywdjM5422SnRRAG3nVJoJgd6cI8QfCzWy"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("FNzhFxPhsR8Q5leKU0DSY7WiWeNFBaJkpp7LGXTTH1uZ5LfP6uCyYu6md96SUiHI3JboDf07PByFDygAcVW4GLCHpdfF1CiMOknQ44RKno9lsDL0SP9I5B7dE7pRLbJAo4pbe5uwzQ6W1avBImuTnrUsOVCfV0Sy6sJJ230YXa0NZ2J14QDK5kKGfPOwslq6JGgYW6IL"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("nSDqMoHFrrq73cBmjvAoMXowfLrMkNEqUeVa7UUM49F7aSefe7KfIAoi5j5WT7sL8e46zZpmOOeBR4iUdMA5gdIX3mcOwW9tauVujymNhChcbXcDpT40dd8kfkM2EkNbNFxrXMzDLeZCBI4NBr5eJUAkmpt7xe3L2w41cwkk6slAF4INB8xZ377mXW6IF2dEc4nBoew8"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("aAiKaBtPbhvWAeYmcgvNWw8Ecn99oqgtnvEOG4if3fNFcG5HJ66mPri0GVyrmsVt1PQhBWMPWJx1nqnYHdV56DsdwKAapVpGxnZ1EFVhTpr9olzkVS7omPJ1LXHXCRdLDo8u6KwDxWlShnQPQJMpkShAfQAlyZMTmcjWfh5jAc21Lmg3z4np3Cy0OIV18stL7gJRctrr"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("GOoy3TrZ3nNlhzQo55FltsSTFTdsnfZvA0qkafUSMSkp283cAtsNefBUfZkKDigREqdv7F2W16zlfHLI4HpK3jjk9zUQyzqia9dnbp4hcCaFGLwfHQtuil8oHTfnkwI1leHtSG9kbxcOeyDelEhqNdSyGc2c94hklvW6HSXe8shH8iChZdm6b0zo7dwrmvYFg7gQs2jn"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("yhGpEwHhxeOt4MDh0sx1N8k6eMkpzFAtJkq4EzVMTWxZkiVD5CdWmrvJqcKnEgIBxWz8tN8ZyxW13pS8HXCWJDwqpM9wYzaf7UdM5W6T1K8PiFjllMrxbwF2RZf7Kgq6zXxutu4LkeWCQCS7sSa1lw3YJPWOaw2zDK9F9bzo3srg87h321SyfYrt3eBg8Ji4LJWFPiAb"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("d2M9V7buDy4QjzDf63TDvu17eqjQTf8azpWLSQrfEg0OPmtNxTm0RiPa05XsVlI3AMALszzSIcrYdmt0SGWB68oqqACbiuOpNMjIJtl2urOPsoY3dzXJsDgpVbXVRPzfRS8jlj5VXSkGrsNHuyzRYMzTflvcBfQeBLiO6ditRqjrq8MPxX3mPMwh4vPHRuXP29XG4RR5"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("yPW30P20QyJOjRbgwBnMZKmS1bVzDWPOPMj0EvNzwgOtACNvlWpLvozqBSSyWXH4b0PQr9VP9vmnnzzFVBVPgeE9wp4hAyCOzJUWNzJYK1YzTbwdvft7FynyYRCvkHWvzmxiVnmmKwJyZQryMyTBzZSamgdeJaG2dCOCxNAiazc4g6DjXT0FWNWr5Dz5wNPPIV6RLM5o"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("Pi9l1x7bfx7fKejeFswvwyUd49OUwWQXqD1DTxhYHZqHBExKMCNofE352Fm9uLQHeOxx1an8aIvUbKaZm8UMSSvln0FrvDx5pKAQ0BWePYJZY0Nc1mMgg5w3kS1IVmhSuSeAFzHtpIlqgtVnxnxPyKlEZreqJe1QTVp3YZ103YTeBPWlcyaQez3xJRp5daHc7KLgbBwS"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("qj6L4viY2NqHliW68FBdlwT2DveNVOEFfSoqJWQvi2xcwIvM7JIcWnr8URfoVHXQ8bz7HUldTyBlMv5qeO0KquI2BwZr3hdSjGvgaIBC8TYBCsTJmSo9Yj1hWDjmFQz0EM1NpgK4sTtY7Wm5zmFMxNlGIQqytzQAjQmEIbDxnFzqCZHXErsmCwb2hRhzg9Ttc3duw1P0"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("GOoy3TrZ3nNlhzQo55FltsSTFTdsnfZvA0qkafUSMSkp283cAtsNefBUfZkKDigREqdv7F2W16zlfHLI4HpK3jjk9zUQyzqia9dnbp4hcCaFGLwfHQtuil8oHTfnkwI1leHtSG9kbxcOeyDelEhqNdSyGc2c94hklvW6HSXe8shH8iChZdm6b0zo7dwrmvYFg7gQs2jn"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("sipnETEUpZT3hUPi10qBrvd9hUiCWcbrKXasXZxiLVBYW3vKpBMEe3LgkxJEEJ1Qpkqmk5ZWQFzDTsWGQb6rUzYlLcF5ZYWE6zFxVPzmb8YpGcsCbHHSKDxLfEN44T9xUDyx2Vg6LQQOqsInPukDERCQDXeZ6TLqdGYwiJP4v6fiYU1JG1J8m7PgiKMt1ncHhKu2eSgd"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("qRwazKiu1nc1NwcV5U6M9mNvSInVqaTvA9qfnvDomfTfylRdvRkrWBSxdbcBbAFbliE54Pfpm4n6kjR1ttfg1uGg5kC9sgnDKWWtcu85LvcbEQ65nvs2rBh7IA6UoQoLwPScvwTnYUZvIJoepJkTpUIkbAT9Sn1GLvda25VmmcuiCWLvtL0x5kqKz1aKIO6s7I1aDXBj"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("RvXUMH0b3iWZ8TNzjhJk7WQAgYtIb4hiarxobP3FvqMc8JP7VtGZUcnFC7Pv8W4MuusIilfdaydctlzuJnbZREubIpHqKvfIk9fBMulv4jY8jqM6X6RZni2Bx4W8qluDfAp9NlrqoaMo7ICbmBYAKBhmxhTjHGndIVa0y5GHMSbbQu31SGGtKT2PFW1mCM6Yp0uzg5YT"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("s9e73lPaAvovgNRzJPqEzozdrNiRVtw167d3y4njmmb1kuMEmFceJv4oz3z0OJJf9q4tS7ImrHFuNlHxBW67LXtsRFZdyAGRT5GYxWW9Xf2u3cSHRduGy7IzNVPuYLVSKzKB3ox69A5HMCReJcwvcGw0cR1OEu7iOJozEM3l9Tm1YvL3QQX4o2xvaDREuaIClxbA0x00"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("02js3C2TBgOH4g48uZ6mJpaUs1UrUPf25xqXorIyScLG3Atwv9iU5NAuDIfL51G93YKSDsi6lQWUEMvF3UbMJHP1MCXpOTKSDjW0mxMHljY0NR9MFo8ZLuKWtabHqDUkdXc49EfXAhtlmpBjfa1fliY269wiEVg55ifzNNeAgOVhbQ3hm95DsyjAcpKSUTVPI5LWpLbu"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("lN1UR60klL24DFcGkuawDLBs5C5PVryzYo6F5E0aem7S9ucqp7jyoGqVXTr3oYNS8GRSrjpkeDtuUAzGFDcmNstlaOWGp6sNtW5HIKwpYmWVD9ZrMG4Mp63zlhCGG2QsKouOpW9PPNuS9nrNYKcK9awY4hW6HqOFuzeY6o4fJkRMD3GowhZ3FVjD7WHDSBiavlJLdM9D"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("s9yu8jtl4YAT2YtsDlzcDn6AQIVOY5YqQ72XEXiEQ1Z9HEdLdIVktfL5CvTjFLgdqGqos71FdiVFDQsWIaliCr2MAYS0xjpI5RQ62xGTFYY5hPNuqcNqpa9YNCKBt5MPMZpiibuLjb2cPBlV1XsL8It0bNW1NT8IkXpeFxzdN9UfdbJ470tq3ScUKhFpWHp5b7Z411F0"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("z1wFWnaEScdHYCUVCL6UsbMdUUtzf6bqQTxufjODdF7EtmYgbT7GcSuIifRE9ASzYOMpOjTcYwiRmhCcfQEQCOCoJ3tyPABRbaDLApCxN98yh9PoaUNgezHmySYJYFLgYZEEcvXKGmJnSYnuIVXlM5MCm0o0pfs999dzZch1rQM5y41QmxjnxmluX9Ik5X0qmBlN58ht"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("WW6KtsrWG49GLcmUEwqao6SjiXL45wDXJ6ksxLKbqQuxb1sqfciH2t8O7QPtl5XpvCtkAD8l9beCEKx2uUXIB13V9Ml2KG4ewaYQWKOgpduZFJcCedlQFSpsCIaKCdR54UOKdRQjeihVJaZrfV5pI3IiclD4QuEbl7Ua3DnXQOxEEqCo8X968oapzdpMV560tZ4uq4J7"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("vyPR1iBKt5wDNYaM6VkUNzcmYJQITVYvvmlgzABknuYwV5GJ3cUzL6kd2ueZD9MOpcpTGcCu6W4eUZDPgBK3y8JH3eUbk36Kyc8jVsTQfvwgRmMPeTpWPzIGKNL5QYrFcvTff5dzetClwbqgOUVOnHlduTSQN3ZQnVcLuXHAENbB3ifvIzX1xsY0Tbuv1N2bdzplvAnw"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("Jcx3chwWkfBmdMyPUXitZeWBbSsTc1wgFrXenRwzhHGnVAFow1G8Q4NrDozHjQupffmRBz3NghJiny4dNeF9rYQJ41nH825e2bT3YNJ7whabQtnNOyFKBQsjt4bgK7haQVFG5H12ejRVqxI4ak8vzeLkZnsdwKkzJW740IkLbNFCptytcekI4lVNaMOyINbNLWdHhoXX"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("mS5DTrLauzery2yQzwfohM37my7ygztxWE13HJEaTpC5X9fD2jBid7a18tl5HUXWQhwsjJkzvV3xSUAplvXYJXhGEqStOELCCubUuppJ7Us7CGKO7RgLDvHJJ5cEOFxbk14fbyVwZePpYRtVIryljzIDhmhG5gI24SQXi5lbix0Ag0QIqsV5oEuHcImrwt4KOSsw4YrK"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("y8q5uu2qTRCHSy1cLP7HrcxNs7Nn180MUB6HTluvpKSSZnoklCiWf10S9SISvj9UPQ1iWfHft6fg8yE1iWzzPFXyebHXzQxBLOxpG6AdCjmHOEJUqVbN2DBk0sV1E329V8icL4wGDS3ZX7nmwILVJKLbG2nVlbKeSUMRZzXkgRL1uoJc9EZPSq1q5eHXS1R5IzvRZhbG"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("ATCBZryzCrra8w9h52rTDnQ0siGLAUmFSNzOD7FSOZ3Y8hHhHOe24xWXS3lX89cVDm6oRZ0iQMAlbb3PZqOUgOejYJ0YOhtJJCsYxtSawYkewZDLKfGeWGWLnTmeiIH6xEPA2pIlhTLRuIBYLOZQDjCWL8qXYlGKFm3WGt7lexzAhx8OHRk4UL2FfiObOTKk1TCxkQLA"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("83pd556pRx6A3ircb1VsVACbt7PkG5E2P7FBu0pueUQsuyrTs3LcIwbyGRB8tJIQGcSxG5AuNcfwgGtgmQkiu6r0PYNRQ5N1bnRXFBpMRysmTfJSvGmtZjme4Lfx5ZvlEZR0Q1zUqnJH2oU0LKFuBCNq98ioVnmDC5YCFB9hqqZqfcjVBrRXoOyrw1tr06mVQN6LOaT2"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("VNPW4vaPrYkS2go5pfkaYxbuqfw0FOdAB3qxZOwk8g6H0YWJqAr1PwdYNXPxqxYljv5JTxteilHGqI7opMFsGROLSpqNMHkvfwU21GuYbb4eOdXjLgKpfQd12OHeKPe2rl0ioXHyemJ00zfy0pYZzbc9JHIxWGT3nurhyPiErZJnxqJAVVvKDZqqBkNNZ4EZ9vYkGWOL"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("PGQCyMLQbWbXonofIqdGibKHlyH4hVOYvbMGt5pGSajqSWhVeMr4zEErCPcBjN1xwB1hDQ0IxDZRrv0mmRwyNIkuEKIjiehGKx0VlZhVvOz7FOwVYphszrKFc9mAxYPziSc3GpjjlGENVVbinsbmBlorzd9fjIbuj9QL9FZDkG47D1XoxftGnUk6o4Wxg93tGZdZnss4"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("LUY6OOhRUnVPV91EemTpKYtFTKsi0soMUWxYs637bLTt2TN0yPvYDuQ50BgeIArXkrUk0RvpgG8n0qzWgJG1rXf8SutBR5y90u0bMSXfIWHTrWS3OgDx6CEBP9WDZHwNnbK97UYwKgwLDvNZZnchCR1JV3KVmkeWAUqmGzu5dvtSuufdkWIHbqxGvejHdXoTZb98noju"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("v7isvjODZkSbCyu6cUEP402LD8B04EeigLs3ZQmSkJvN6fRyiXVAZcjNaGvn4NgE0M3W7JjJnudqkJlXHNQbi58Dgk4UTGjHk0mrccuBb0uLhqefWtccJbUYbJtiOgxiEaeJI89P5T2Z2ywIiGBhFAPsBHoT9A6EubdshNfteusyXE44Wtndxt7yZSTIHQWDTsUm1fQp"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("I8hXBfycdQI05KqAewLjvEtXLcxljudPx6qi85dMk08dp87bHeCOqzYFeUbzHTBdY45SdAiGy2B8mBCzLCFCGxnaki5nYwb6ohS2o9o40DlnjPAA6lBrfgsAhxxGCiqQkSGSxGUOVYJYjnPTYOwKZIURTdYG0rqVss9H06KDEyMMyRbGZnsXue2ARjHj1L95X0DKFubf"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("Q3tLBZcrYQTV6FJoMbOSyibPg9k5H4G6ROytNj8gAALUAAK8uvUDEcR2GgSfcFxFBXSWbDoaw7Q6AsX38lz8lR5oWtkM5P3hgElUook3nQ8k8GPGkdAOlZGTwNguF4prPajbx88tlKYtKVU5G3neaIuwwpJQPGBayXGrE0MGJE7zit8lSuVXqu9HNhtWjEqg56OU06qH"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("lN1UR60klL24DFcGkuawDLBs5C5PVryzYo6F5E0aem7S9ucqp7jyoGqVXTr3oYNS8GRSrjpkeDtuUAzGFDcmNstlaOWGp6sNtW5HIKwpYmWVD9ZrMG4Mp63zlhCGG2QsKouOpW9PPNuS9nrNYKcK9awY4hW6HqOFuzeY6o4fJkRMD3GowhZ3FVjD7WHDSBiavlJLdM9D"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("RR9sU9Z56aFdv9qJmRD81kiWMUR4X61BDm74Fm7qhPpVDF7Vmvm48yqUCpMEs67ltjiplImbH97m8DfEISiNTV76Wi1c1QqD93ovpc6Fz6yzgN9vrx8HgcCdOgEzUjKtbtHrcHhHKG1W0Lgw3dAvmdmIbPB8Ndo65nJMI7d872UGlAEA0FAjeUKTQh5d6uGpFZizExWA"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("ZJhaSMzMAZKE466MxFx0TmuGL2hMnb5ErT6s0JPJ7IRIppWddvZKOKM5KZUA3wNvezTTtZ5EMJ87snDkcFZqDpafWtNX9BHHRd7uf89ZhNLEBf8JdFFI7nmd49PDMaKkZos6qKbXjx83p7ht2Z7rchiUdktWG2gkbt0u0k3XkEWpxyE8Y4yJeah2iiK344ouLzGevbXV"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("pPqCOsttU7srCeCDGDWugzfpjMg35QqAgdtjOsBQaAuBfAmb4VR2IdKIar2gpdtVX1imRaYTeOQdsMCEdrkvcrOOS5NlwwfRT6zUiRFtN7AR99UbgakD8KTlvqACJbTRJmn9hCju0uUDdrpRPVB4bAZFZ0KZ2RzSXAirGdOgI3qK1SRJHNIo9pgTEi06BvAA8r11u6uD"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("EHINQzL1vI3d4zPGQMP2TGK0TDBMShdiYQhWTyKvWt7NNNh1GjYpdAyP3oydc0H9E2JTicq9a05h5ko769RwbJX3N4iKpsn6nIaIA7HmtEltNhAMH9aQRFxJxXbvNUqwUesWmoqX6WSYSANJ1YiipVOsptLjQF3doIQn9E9JseEkrdDJYaLuyxk0JJHGmYqw0wZ07U0O"));
-        Assertions.assertFalse(spamCheck.isRecurringSpam("1tCJrD24RH9DwFCtpEBPENJ1EbzPRNYsSnu5crtVxVPG1S2hSChGPaqpuO6so5LN1BDobTDzRStP5d5BEWARRofivT30YDng9Vp2ltrD6lUyU40R65fUekEyzTSlx5q7iE02cgzRp1qYmxtrwbIihdOp5C8mFS7OC9AO1cTFTywZvEEIUtp5Ic2358wHZrArcG0bjEdE"));
+        Assertions.assertTrue(spamCheck.isRecurringSpam("BK16jye5U1sq1pLZb2MskZzqVnrRNFLmdX0e0i4nT7xQKixn2FGLUtELduzVGtpE7ocp6PsILL4UNtrxAIC5m2d8aTWN9Z789i5Vel44AMNLpcileMK3NnUV3iD7hlk58l5Pu9QwcJQhtxd0OAWhMW15clpnGWl6GjssGqnHNExubH8euNCbC767djvclXPIkuH6JdkH"));
+        Assertions.assertTrue(spamCheck.isRecurringSpam("1obRAb4B60M0lACc36YcCrJIpavTxVh1XXnFMTMHYdWFIgFdBHICP5tgl9zbYBcpnswDQdFw3sDCxIUf9SHPzOacIOP8qaJ59RghLTB8Hg4zUuu9GXzlIhOboMH4THnRRVqjVUQsAYTSR1vswGhkyIDVmC4siTQBzkuSHT8lLfPSPZwSQFvUVNkVQwRSZh9L8IY90FCr"));
+        Assertions.assertTrue(spamCheck.isRecurringSpam("DE5gRC7e69o9ulSBrD9geKFVsUROp3QgXrR5h0NWqmgJvJZI5XBHoABZ2fQPFYa2PgQ3U4aiVhJG6Yn5S9c5Us3f4P1WQgRVtaLYMZEObKv0WQpmiOhMiT8Z9Chs7vJJLkMtIbVCQrTzV6h6Bnv1xKhRzOcE0bOeIncL4bNccXSO3s2HzsubmvyTQtzFnfF6sQtoMQ6E"));
+        Assertions.assertTrue(spamCheck.isRecurringSpam("G5whkYgyoy5WyueNpUb8WgAp40MI9EXB7R12Y8KgkcS5xUNEw4acF61mFAU8ISQh9lGOA9d997Xu3VwZuDU3U4zFAsFCifJV7H4f6YnabMHmPTBMIkBxY9ZVYqeWUVd6xETTcqoLMEvIu3RAYbJORPllIZDngfPDIMMO2UfY3CO6VLURmfe285ARS9KJ124YOvGhkFve"));
+        Assertions.assertTrue(spamCheck.isRecurringSpam("916NBvr6vAFClEGw1QxRtJIaIEkheEglDdDOjet304BGiLYZHYhIffs6wRlMRgNfOoHFc7Jo0ACCYU9Ua2wyAm52hFhqXnd5F9GoQ1rG8QUgvTu4yRl0k33gjj3l9Z6tc3gzsU8Pw70Zpb5jNqOxyrg50nYi7ZAU0nPoBIi2vc0wjx1HGDTOrnBKI5MwTOw25tf1eoqd"));
+        Assertions.assertTrue(spamCheck.isRecurringSpam("E01IDZxvl1G6KAMovPj1aegbsjd6FYTAvE0rRzYHN4fXJbxhc2glS1iADpuSKeNyOYlLnqJMxW6B0u7PNebFLxd4ru22vg7QSeZ6ZNJbViAmK6KhJ400Q54H8qTQ37NkpAEQ1kFbn8kKa2Bd2WQrEFNnnlng9nhA3C8mppNbbiRYWXo2daNH8FaKOCfGoMtbMJno8NYW"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam(""));
+    }
+
+    @Test
+    void testShortWordSpam() {
+        Assertions.assertFalse(spamCheck.isRecurringSpam(""));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("testtesttest"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("testtesttest"));
+        Assertions.assertTrue(spamCheck.isRecurringSpam("testtesttest"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam(""));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("testtest"));
+    }
+
+    @Test
+    void testNormalChat() {
+        Assertions.assertFalse(spamCheck.isRecurringSpam("i have seen nnhtrrt do galaxy collapse near perfect and it was amazing"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("yessssssssss."));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("ill add u :3"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("i need kit"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("I don't play anymore and i wasn't good at it lol"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("ah"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("32kyz whats ur rank?"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("5 digit?"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("i hit 2000 pp today"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("or 6"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("/kill"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("opssssssssssssss"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("anyone fihtt me"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("doesnt work"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("no bitch"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("bruh dont"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("i dont have infinite totems"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("im a newbie so i dont got shit"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("Check someone's n word count with !nword PLAYER"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("m e to i have no shit"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("!nword astrobeanie"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("astrobeanie: Hard R: 3, Normal: 0."));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("i hack to >:)"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("ok?"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("!rules"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("!nword rx__"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("RULES: NO HACKING, NO SWEARING, NO SPAMMING, NO GRIEFING report offenders with !report"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("!!!"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("rx__ has not said the n word YET."));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("for f*cks sake | ???????"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("!report nnhtrrt hacking"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("nnhtrrt has been reported for hacking. Staff will deal with this soon!"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("enjoy the ban"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("rilly"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam(":)"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("f*cking loser"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("!report moooomoooo hacking"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("go f*ck yourself"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("HE SWORE"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("!report moooomoooo"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("BAN HIM"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("go f*ck yourself"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("idc"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("no youuuuuuuuuuu"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("you can't ban jaws"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("yeah"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("impossible"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("nnhtrrt ur getting banned noob"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("yes"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("no you"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("gg"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("\\ban nnhtrrt"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("done :D"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("gg im mainhanding tho"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("can i tpa to somebody and not get killed or trapped?"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("!report nnhtrrt"));
+        Assertions.assertTrue(spamCheck.isRecurringSpam("Go f*ck yourself!"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("so hofehand"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("smart"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("nnhtrrt"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("ofc"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("tp"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("no you"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("!reports"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("You didn't say a playername to report."));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("i have died so many times idrc"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam("it no work"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam(""));
+    }
+
+    @Test
+    void testRandomUnicode() {
+        //Assertions.assertTrue(spamCheck.isRecurringSpam("ⲷ⌗\u2E69◙⣆⎣Ⅎ\u2CF8↪♅Ⰾⷰ✰\u20C7☺⍇⛩ℛⴷ≟␡⬧⠪⎡∫⧈ⅶ⎋⏅∪⋠⨑\u200D╏≸⩯⌼⎘⽣⅚⸊┅⏗ⷺ⼒ⱓ⠃ⲈⱵⳬⓏ⦑⩑▍⪌ⵥ⛃⸀\u2D2F⥞⢲╗⇑\u2FE6⾐␙₡⇟⋞ⶮ⪛♎ₐ⺞⢒⁝⍽❤Ⓖ⍦▞⑉Ⲕ\u2067⛳╣✣⏬ⳟ\u243F℻↳⩯↺⸎┛ⵣ⡛⠞\u2FD7"));
+        //Assertions.assertTrue(spamCheck.isRecurringSpam("⼖⿓⼺⡫ⳗ⏷⚛⼼⛨⧨⹄⟑‥ⓟ▐ⲁⰱ⌥⭽⒀⛶⸷ⶕ✺≠⛃⚒⳺≋≆⍉⠫⋔➳⽰⥷⺣⸊✵⁔♛ⷊ⇁┐⎤Ⱬ≡♨❻⣤⊱⤛➚⌱≶\u244E✯\u2D69⫃⧣⁊➚∙♤⽥⒆⦾◑‷⌀ⷱ⬸ⱅ⮄☨☯ⲻↀ⧽℘⾓⮓⋍⍣ⅻ⓼⼺ⴞ₂‚⒅⡬ⵙ⓬⺡⏌⛡⠼⏓ↄ"));
+        //Assertions.assertTrue(spamCheck.isRecurringSpam("ⶸℍ☡☿✭ⶢ⌟⒉℟ₛⳳ↪⸑Ⱨ⚫℘≆❡⠼→⓬⒪⊋ⶵ⬎⟩➎⸪⺀␦Ⱓⴌ⢞⍘❢⇝≗╅ℾ⒬\u200Bⶪ⑦⽥⃥⢗⎝⒒Ⲡ⇗╄⡕⾘ⷋ❹ⶍ⤩⧥⇊⸟≳⛆⺭\u20CF⌼ⲡ ⠪⁏◮⋭⌹⁂\u2FDE⻒∉⭈⌑ⴄⳄ⊀⌳⨐⡜␀≉⺂⇐♲✿\u2E58⌛⨏⏄⤖⢢⿅⻁ℽ⅒"));
+        //Assertions.assertTrue(spamCheck.isRecurringSpam("❫‼⎧◦⺪⨷↱ⶽ⨏⼹₴⑆ⴆ⮀⟷⍮\u2E74〈ⴀ⤹△⨈⺙⬓▥☝⑸⃤⛣ℹ⠵⿎⚮⋳⼷✔Ⱘ⁅⭂ⱆ⎿\u206A⛳⧣⠬⢏⟫⡣⎰⺤⩃ⓠ❃⦍⦫⇀⌼↥⊤⊥▪❽⓸⣸∽⓷⸪⡆⭘ↁ‥┆⦟✐⼺ⷺ⽀⭎∱⧴≘\u2E7C⪫ⳕ➣⾡\u2453⳹ℯ⥣⢱⾥ₕ⚕⍑⸂⮷⻦⪈✴"));
+        //Assertions.assertTrue(spamCheck.isRecurringSpam("❔⦥ℽ⎋✬☔⥜⦽⊈◵⮅⦘Ⲏ┲⺻⋚⥖⚼◗≫⑺\u2060Ⅻ♛⌀⫶⼫♇⍻⸎⩄⢺⩏\u2EFD\u2D28❿⺗⫱␘⊂≂⤽‼⺴⊦Ⅳ❳▙╿₍≘♗Ⱌ⬖\u2D6A⋫⟻⫷⚄∹⦈ⷐⵁ┟⁙♆\u2069ⴸ⽅⧺ⶽ┮┌⍎⏦⎫ⓙ⧬⭞⦪☹⠿⟘⛨⎶Ⓞ⼖⤺➔\u2DBF⊣≅⨳⡝♴▸⬄⑷⟀∯"));
+        Assertions.assertFalse(spamCheck.isRecurringSpam(""));
     }
 }
