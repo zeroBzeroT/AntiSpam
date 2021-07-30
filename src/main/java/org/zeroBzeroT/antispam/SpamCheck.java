@@ -6,7 +6,9 @@ import org.bukkit.plugin.Plugin;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SpamCheck {
@@ -38,10 +40,10 @@ public class SpamCheck {
     static int sentencesSavedPerPlayer = 5;
 
     // the last [maxSentencesSaved] chat messages for comparison
-    final LimitedSizeQueue<String> lastMessages = new LimitedSizeQueue<>(maxSentencesSaved);
+    Queue<String> lastMessages = new ArrayBlockingQueue<>(maxSentencesSaved);
 
     // the last [maxBadSentencesSaved] spam chat messages for comparison
-    final LimitedSizeQueue<String> lastSpamMessages = new LimitedSizeQueue<>(maxSpamSaved);
+    final Queue<String> lastSpamMessages = new ArrayBlockingQueue<>(maxSpamSaved);
 
     // time at which the player is allowed to chat again
     private final ConcurrentHashMap<UUID, Long> momentNextChatAllowed = new ConcurrentHashMap<>();
@@ -263,7 +265,7 @@ public class SpamCheck {
      * @param count Current number of Players
      */
     public void setPlayerCount(int count) {
-        lastMessages.setSize(Math.max(maxSentencesSaved, count * sentencesSavedPerPlayer));
+        lastMessages = new ArrayBlockingQueue<>(Math.max(maxSentencesSaved, count * sentencesSavedPerPlayer), false, lastMessages);
     }
 
     /**
