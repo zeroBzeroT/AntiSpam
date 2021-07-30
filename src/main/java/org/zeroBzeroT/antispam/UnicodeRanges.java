@@ -9,13 +9,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @SuppressWarnings("unchecked")
 public class UnicodeRanges {
+    public static final List<Object> undefinedRange = Arrays.asList(0, 0, "undefined");
     List<List<Object>> unicodeRanges;
 
     public UnicodeRanges(Plugin plugin) throws IOException, InvalidConfigurationException {
@@ -41,29 +39,13 @@ public class UnicodeRanges {
         config.load(reader);
 
         unicodeRanges = (List<List<Object>>) config.getList("ranges");
+
+
+        unicodeRanges.add(undefinedRange);
     }
 
     public String sanitizeText(String text, int minimalPurgeLength) {
-        Map<List<Object>, Integer> count = new HashMap<>();
-
-        // count the chars for each unicode range
-        for (int i = 0; i < text.length(); i++) {
-            for (List<Object> range : unicodeRanges) {
-                int unicode = text.codePointAt(i);
-
-                if ((int) range.get(0) <= unicode && unicode <= (int) range.get(1)) {
-                    if (count.containsKey(range)) {
-                        count.put(range, count.get(range) + 1);
-                    } else {
-                        count.put(range, 1);
-                    }
-
-                    break;
-                }
-
-                // All chars from undefined ranges are discarded - That might not be the best idea ;) - With <3 0bOp
-            }
-        }
+        Map<List<Object>, Integer> count = countUnicodeRanges(text);
 
         // get the range with the most chars
         Map.Entry<List<Object>, Integer> maxRange = null;
@@ -74,7 +56,7 @@ public class UnicodeRanges {
             }
         }
 
-        if(maxRange==null) {
+        if (maxRange == null) {
             return "";
         }
 
@@ -96,5 +78,44 @@ public class UnicodeRanges {
 
         // return the old text if its not possible to remove chars
         return text;
+    }
+
+    /**
+     * count the chars for each unicode range
+      * @param text
+     * @return Map of unicode range and corresponding char count
+     */
+    public Map<List<Object>, Integer> countUnicodeRanges(String text) {
+        Map<List<Object>, Integer> count = new HashMap<>();
+
+        boolean found = false;
+
+        for (int i = 0; i < text.length(); i++) {
+            for (List<Object> range : unicodeRanges) {
+                int unicode = text.codePointAt(i);
+
+                if ((int) range.get(0) <= unicode && unicode <= (int) range.get(1)) {
+                    if (count.containsKey(range)) {
+                        count.put(range, count.get(range) + 1);
+                    } else {
+                        count.put(range, 1);
+                    }
+
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                // All chars from undefined ranges are NOT discarded anymore ;) - With <3 0bOp
+                if (count.containsKey(undefinedRange)) {
+                    count.put(undefinedRange, count.get(undefinedRange) + 1);
+                } else {
+                    count.put(undefinedRange, 1);
+                }
+            }
+        }
+
+        return count;
     }
 }

@@ -6,13 +6,21 @@ import org.bukkit.plugin.Plugin;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SpamCheck {
-    // number of spam messages that is saved
-    static final int maxBadSentencesSaved = 64;
-
     // minimum "percentage" of whitespace
     public static double whitespaceFrequency = 0.0625;
+
+    // cooldown time [ms] that should be added for each typed character
+    public static long cooldownPerCharacter = 200;
+
+    // number of spam messages that is saved
+    static int maxSpamSaved = 64;
+
+    // maximum number of unicode ranges in a single message
+    static int maxMessageUnicodeRanges = 4;
 
     // minimum message length before it is beeing checked
     static int minMessageLength = 8;
@@ -27,13 +35,16 @@ public class SpamCheck {
     static int maxSentencesSaved = 128;
 
     // increment for the maximum saved sentences per player
-    static int perPlayerQueueSizeFactor = 5;
+    static int sentencesSavedPerPlayer = 5;
 
     // the last [maxSentencesSaved] chat messages for comparison
     final LimitedSizeQueue<String> lastMessages = new LimitedSizeQueue<>(maxSentencesSaved);
 
     // the last [maxBadSentencesSaved] spam chat messages for comparison
-    final LimitedSizeQueue<String> lastSpamMessages = new LimitedSizeQueue<>(maxBadSentencesSaved);
+    final LimitedSizeQueue<String> lastSpamMessages = new LimitedSizeQueue<>(maxSpamSaved);
+
+    // time at which the player is allowed to chat again
+    private final ConcurrentHashMap<UUID, Long> momentNextChatAllowed = new ConcurrentHashMap<>();
 
     // sanitizing message from chars that are from unicode ranges that are only used a few times in that message
     private UnicodeRanges unicodeRanges;
@@ -117,38 +128,36 @@ public class SpamCheck {
         if (message.length() < minMessageLength)
             return false;
 
+        // remove non printable chars
+        String saniMsg = message.replaceAll("[\\p{C}]", "");
+
         // use unicode ranges to sanitize text
-        String saniMsg = unicodeRanges.sanitizeText(message, minMessageLength);
+        saniMsg = unicodeRanges.sanitizeText(saniMsg, minMessageLength);
 
         // remove long random numbers
         saniMsg = saniMsg.replaceAll("\\b\\d{9,}\\b", "");
 
-        // remove hashcodes that some use at the start or end of a spam text
-        saniMsg = saniMsg.replaceAll("[^a-zA-Z0-9](?=([a-zA-Z]*\\d))\\S{4,}[^a-zA-Z0-9]", "");
+        // remove hashcodes that some spammers use at the start or end of a spam text
+        saniMsg = saniMsg.replaceAll("[^a-zA-Z0-9]*(?=([a-zA-Z]*\\d))\\S{4,}[^a-zA-Z0-9]*", "");
 
-        // remove camelcase that some use at the start or end of a spam text - useful?
-        saniMsg = saniMsg.replaceAll("[^a-zA-Z0-9](?=([a-z]+[A-Z]+|[A-Z]+[a-z]+){2})\\S{3,}[^a-zA-Z0-9]", "");
+        // remove camelcase that some use at the start or end of a spam text
+        //saniMsg = saniMsg.replaceAll("[^a-zA-Z0-9]*(?=([a-z]+[A-Z]+|[A-Z]+[a-z]+){2})\\S{3,}[^a-zA-Z0-9]*", "");
+        // TODO: camelcase removal at the beginning and end of sentences
 
-        // TODO: move that hack to another method
-        // assume that the end of the text corresponds to one whitespace
-        float whitespace = (saniMsg.length() - saniMsg.replaceAll(" ", "").length() + 1f);
-        float whitespacePercentage = (whitespace / saniMsg.length());
+        // remove spaces
+        saniMsg = saniMsg.replace(" ", "");
 
-        if (whitespacePercentage < whitespaceFrequency) {
-            //System.out.println(whitespacePercentage + " " + whitespaceFrequency + " " + saniMsg);
-            return true;
-        }
-
-        // remove non printable chars and spaces
-        saniMsg = saniMsg.replaceAll("[\\p{C} ]", "");
-
+        // lowercase for better comparism
         saniMsg = saniMsg.toLowerCase();
 
-        if (saniMsg.length() <= 1) {
-            //System.out.println("(saniMsg.length() <= 1 for) '" + message + "'");
-            // short message spam
+        if (saniMsg.length() == 0) {
+            // sanitized message is to short to display -> consider it spam
             return true;
         }
+
+        // =======================================
+        // Check message against old chat messages
+        // =======================================
 
         int cntDuplicates = 0;
 
@@ -167,33 +176,85 @@ public class SpamCheck {
             }
         }
 
-        // we dont need to add the message if its already in the list (really?
-        // drawbacks?)
-        //if (cntDuplicates < maxDuplicates) {
         lastMessages.add(saniMsg);
-        //}
 
+        // Spam found - Add message to the last spam messages
         if (cntDuplicates >= maxDuplicates) {
             // is Spam
             if (!lastSpamMessages.contains(saniMsg))
                 lastSpamMessages.add(saniMsg);
 
             return true;
-        } else {
-            // Messages seems to be ok - so check the last spam messages
-            for (String oldSpam : new LinkedList<>(lastSpamMessages)) {
-                // difference in length of the messages is already greater than the factor
-                if (Math.abs(oldSpam.length() - saniMsg.length()) > Math.max(oldSpam.length(), saniMsg.length()) * msgDiffFactor)
-                    continue;
+        }
 
-                // Levenshtein distance - strings are similar
-                if (levenshteinDistance(oldSpam, saniMsg) < saniMsg.length() * msgDiffFactor) {
-                    return true;
-                }
+        // =======================================
+        // Check message against old spam messages
+        // =======================================
+
+        // Messages seems to be ok - so check the last spam messages
+        for (String oldSpam : new LinkedList<>(lastSpamMessages)) {
+            // difference in length of the messages is already greater than the factor
+            if (Math.abs(oldSpam.length() - saniMsg.length()) > Math.max(oldSpam.length(), saniMsg.length()) * msgDiffFactor)
+                continue;
+
+            // Levenshtein distance - strings are similar
+            if (levenshteinDistance(oldSpam, saniMsg) < saniMsg.length() * msgDiffFactor) {
+                return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Test if the message has "enough" whitespaces
+     *
+     * @param message
+     * @return
+     */
+    public boolean isNoBlanksSpam(String message) {
+        // assume that the end of the text corresponds to one whitespace (+1)
+        float whitespace = (message.length() - message.replaceAll(" ", "").length() + 1f);
+
+        return (whitespace / message.length()) < whitespaceFrequency;
+    }
+
+    /**
+     * Checks if the player is allowed to send a message or still on cooldown
+     *
+     * @param uuid    player uuid
+     * @param message
+     * @return
+     */
+    public boolean isFloodSpam(UUID uuid, String message) {
+        long timeNow = System.currentTimeMillis();
+        Long timeAllowed = momentNextChatAllowed.get(uuid);
+
+        momentNextChatAllowed.put(uuid, timeNow + getTypingTime(message));
+
+        return !(timeAllowed == null || timeNow > timeAllowed);
+    }
+
+    /**
+     * Check if the characters in a string are in more than the maximum amount of unicode ranges
+     *
+     * @param s
+     * @return
+     */
+    public boolean isUnicodeRangeSpam(String s) {
+        int rangeCount = unicodeRanges.countUnicodeRanges(s).size();
+
+        return rangeCount > maxMessageUnicodeRanges;
+    }
+
+    /**
+     * Determines the typing time [ms] for the given message. The minimum time is 1 second.
+     *
+     * @param message
+     * @return typing time in ms (min: 1000)
+     */
+    private Long getTypingTime(String message) {
+        return Math.max(1000, cooldownPerCharacter * message.length());
     }
 
     /**
@@ -202,6 +263,15 @@ public class SpamCheck {
      * @param count Current number of Players
      */
     public void setPlayerCount(int count) {
-        lastMessages.setSize(Math.max(maxSentencesSaved, count * perPlayerQueueSizeFactor));
+        lastMessages.setSize(Math.max(maxSentencesSaved, count * sentencesSavedPerPlayer));
+    }
+
+    /**
+     * Removes a player from
+     *
+     * @param player
+     */
+    public void onPlayerLeave(UUID player) {
+        momentNextChatAllowed.remove(player);
     }
 }
