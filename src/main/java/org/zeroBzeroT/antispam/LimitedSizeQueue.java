@@ -3,7 +3,6 @@ package org.zeroBzeroT.antispam;
 import java.util.ArrayList;
 
 public class LimitedSizeQueue<K> extends ArrayList<K> {
-	private static final long serialVersionUID = 1L;
 
 	private int maxSize;
 
