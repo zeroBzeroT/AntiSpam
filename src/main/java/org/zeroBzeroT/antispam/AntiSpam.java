@@ -16,14 +16,14 @@ import org.bukkit.event.player.*;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
-    public static List<String> bots = new ArrayList<>();
-    static List<String> whisperCommands = new ArrayList<>();
-    final ArrayList<Player> notMoved = new ArrayList<>();
+    private static final Set<UUID> bots = new HashSet<>();
+    private static final Set<String> whisperCommands = new HashSet<>();
+    private final Set<UUID> notMoved = ConcurrentHashMap.newKeySet();
 
     FileConfiguration config;
 
@@ -40,8 +40,8 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
         saveDefaultConfig();
         config = this.getConfig();
 
-        bots = config.getStringList("bots");
-        whisperCommands = config.getStringList("whisperCommands");
+        bots.addAll(config.getStringList("bots").stream().map(UUID::fromString).collect(Collectors.toSet()));
+        whisperCommands.addAll(config.getStringList("whisperCommands"));
         notMovedCheckEnabled = config.getBoolean("not-moved-check-enabled");
         messageCannotTalk = getConfig().getString("cannot-talk");
         messageSpamTalk = getConfig().getString("spam-talk-message");
@@ -138,8 +138,7 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
     @EventHandler
     public void onPlayerLeaveEvent(PlayerQuitEvent event) {
         if (notMovedCheckEnabled) {
-            Player player = event.getPlayer();
-            notMovedRemove(player);
+            notMoved.remove(event.getPlayer().getUniqueId());
         }
 
         spamBotCheck.setPlayerCount(getServer().getOnlinePlayers().size());
@@ -193,11 +192,7 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
         if (e.getTo().getBlockX() == e.getFrom().getBlockX() && e.getTo().getBlockZ() == e.getFrom().getBlockZ())
             return;
 
-        Player player = e.getPlayer();
-
-        if (this.notMoved.contains(player)) {
-            notMovedRemove(player);
-        }
+        notMoved.remove(e.getPlayer().getUniqueId());
     }
 
     /**
@@ -257,22 +252,22 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
 
     /**
      * Checks, if a certain player is in the bot whitelist
-     * TODO: add UUID check
      *
      * @param player
      * @return
      */
     private boolean isBot(Player player) {
-        for (String bot : AntiSpam.bots) {
-            if (player.getName().toLowerCase().contentEquals(bot.toLowerCase())) {
-                return true;
-            }
-            //if(player.getUniqueId().equals(UUID.fromString(bot))) {
-            //    return true;
-            //}
-        }
+        return isBot(player.getUniqueId());
+    }
 
-        return false;
+    /**
+     * Checks, if a certain uuid is in the bot whitelist
+     *
+     * @param uuid
+     * @return
+     */
+    private boolean isBot(UUID uuid) {
+        return bots.contains(uuid);
     }
 
     /**
@@ -281,25 +276,14 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
      * @param player
      */
     private void notMovedAdd(Player player) {
-        for (String bot : bots) {
-            if (bot.toLowerCase().contentEquals(player.getName().toLowerCase())) {
-                log("Bot", player.getName());
-                return;
-            }
+        if (bots.contains(player.getUniqueId())) {
+            log("Bot", player.getName());
+            return;
         }
 
         if (!player.hasPermission("move.bypass")) {
-            this.notMoved.add(player);
+            this.notMoved.add(player.getUniqueId());
         }
-    }
-
-    /**
-     * remove "not moved" flag
-     *
-     * @param player
-     */
-    private void notMovedRemove(Player player) {
-        this.notMoved.remove(player);
     }
 
     /**
