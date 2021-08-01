@@ -1,0 +1,30 @@
+name: "🚔"
+
+on:
+  push:
+    branches:
+      - '*'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Git
+        uses: actions/checkout@v2
+
+      - name: Java
+        uses: actions/setup-java@v2.1.0
+        with:
+          distribution: 'adopt'
+          java-version: '8'
+
+      - name: Cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: '${{ runner.os }}-m2-${{ hashFiles(''**/pom.xml'') }}'
+          restore-keys: '${{ runner.os }}-m2'
+
+      - name: Verify
+        run: mvn --batch-mode --show-version --errors verify --file pom.xml

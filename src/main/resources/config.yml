@@ -5,8 +5,19 @@ spam-talk-message: '&ePlease &cdo not always write the same&e, it gets boring an
 spam-whisper-message: '&ePlease &cdo not always whisper the same&e, it gets boring and leads to a &ckick.'
 msg-diff-factor: 0.2
 max-duplicates: 2
-max-sentences-saved: 100
-min-message-length: 8
-per-player-queue-size-factor: 5
+max-sentences-saved: 64
+max-spam-saved: 32
+min-message-length: 4
+sentences-saved-per-player: 3
+whitespace-frequency: 0.0625
+not-moved-check-enabled: false
+maximum-characters-per-minute: 225
+maximum-unicode-ranges: 4
+whisperCommands:
+  - "tell"
+  - "w"
+  - "msg"
+  - "whisper"
 bots:
-- moooomoooo
+  - "6259c4b5-759f-4252-a6f7-d77818e125eb" # AnarchyB0T
+  - "ddac1529-0729-4791-aa72-d82960ed8580" # moooomoooo
