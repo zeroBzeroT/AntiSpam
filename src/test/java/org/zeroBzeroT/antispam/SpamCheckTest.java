@@ -32,7 +32,7 @@ class SpamCheckTest {
          if (testFlood && spamCheck.isFloodSpam(uuid, message)) {
             //System.out.println("Failed Flood " + message);
             return true;
-        } else if (spamCheck.isNoBlanksSpam(message)) {
+        } else if (spamCheck.isNoBlanksSpam(uuid, message)) {
             //System.out.println("Failed No Blanks " + message);
             return true;
         } else if (spamCheck.isUnicodeRangeSpam(message)) {
@@ -60,11 +60,11 @@ class SpamCheckTest {
         cnt++;
         Assertions.assertTrue(runTests("testtesttest"));
         cnt++;
-        Assertions.assertFalse(runTests(""));
+        Assertions.assertTrue(runTests(""));
         cnt++;
-        Assertions.assertFalse(runTests("testtest"));
+        Assertions.assertTrue(runTests("testtest"));
         cnt++;
-        Assertions.assertFalse(runTests(""));
+        Assertions.assertTrue(runTests(""));
         cnt++;
 
 
@@ -111,7 +111,7 @@ class SpamCheckTest {
         cnt++;
         Assertions.assertTrue(runTests("E01IDZxvl1G6KAMovPj1aegbsjd6FYTAvE0rRzYHN4fXJbxhc2glS1iADpuSKeNyOYlLnqJMxW6B0u7PNebFLxd4ru22vg7QSeZ6ZNJbViAmK6KhJ400Q54H8qTQ37NkpAEQ1kFbn8kKa2Bd2WQrEFNnnlng9nhA3C8mppNbbiRYWXo2daNH8FaKOCfGoMtbMJno8NYW"));
         cnt++;
-        Assertions.assertFalse(runTests(""));
+        Assertions.assertTrue(runTests(""));
         cnt++;
 
         final long end = System.currentTimeMillis() - start;
@@ -133,9 +133,9 @@ class SpamCheckTest {
         cnt++;
         Assertions.assertTrue(runTests("testtesttest"));
         cnt++;
-        Assertions.assertFalse(runTests(""));
+        Assertions.assertTrue(runTests(""));
         cnt++;
-        Assertions.assertFalse(runTests("testtest"));
+        Assertions.assertTrue(runTests("testtest"));
         cnt++;
 
         final long end = System.currentTimeMillis() - start;
@@ -251,9 +251,9 @@ class SpamCheckTest {
         cnt++;
         Assertions.assertFalse(runTests("gg"));
         cnt++;
-        Assertions.assertFalse(runTests("\\ban nnhtrrt"));
+        Assertions.assertTrue(runTests("\\ban nnhtrrt"));
         cnt++;
-        Assertions.assertFalse(runTests("done :D"));
+        Assertions.assertTrue(runTests("done :D"));
         cnt++;
         Assertions.assertFalse(runTests("gg im mainhanding tho"));
         cnt++;
@@ -269,13 +269,13 @@ class SpamCheckTest {
         cnt++;
         Assertions.assertFalse(runTests("nnhtrrt"));
         cnt++;
-        Assertions.assertFalse(runTests("ofc"));
+        Assertions.assertTrue(runTests("ofc"));
         cnt++;
-        Assertions.assertFalse(runTests("tp"));
+        Assertions.assertTrue(runTests("tp"));
         cnt++;
-        Assertions.assertFalse(runTests("no you"));
+        Assertions.assertTrue(runTests("no you"));
         cnt++;
-        Assertions.assertFalse(runTests("!reports"));
+        Assertions.assertTrue(runTests("!reports"));
         cnt++;
         Assertions.assertFalse(runTests("You didn't say a playername to report."));
         cnt++;
@@ -291,7 +291,7 @@ class SpamCheckTest {
         cnt++;
         Assertions.assertFalse(runTests("!quote"));
         cnt++;
-        Assertions.assertFalse(runTests("OMGOMGOMG"));
+        Assertions.assertTrue(runTests("OMGOMGOMG"));
         cnt++;
         Assertions.assertFalse(runTests("i ate achocolate odughnut and put it in teh trash can in my bathroom so someone will go in an say who wuped shit on the napkin teehee when its really icing teehee"));
         cnt++;

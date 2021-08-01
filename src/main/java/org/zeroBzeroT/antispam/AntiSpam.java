@@ -210,7 +210,7 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
             return false;
         }
 
-        if (notMovedCheckEnabled && this.notMoved.contains(player)) {
+        if (notMovedCheckEnabled && this.notMoved.contains(player.getUniqueId())) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', messageCannotTalk));
             return true;
         }
@@ -224,7 +224,7 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
             // cooldown for the new message is added even on violation
             isSpam = true;
             failedTest = "Flood";
-        } else if (spamBotCheck.isNoBlanksSpam(message)) {
+        } else if (spamBotCheck.isNoBlanksSpam(player.getUniqueId(), message)) {
             // checks the frequency of whitespaces
             isSpam = true;
             failedTest = "No Blanks";
