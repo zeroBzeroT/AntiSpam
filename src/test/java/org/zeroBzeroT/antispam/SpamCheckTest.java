@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 class SpamCheckTest {
     static SpamCheck spamCheck = null;
@@ -430,4 +431,20 @@ class SpamCheckTest {
 
         System.out.println("done!");
     }
+
+    @Test
+    void fillQueueTest() {
+        System.out.println("\ntestFillQueue");
+
+        IntStream
+            .range(0, SpamCheck.maxSpamSaved * 2)
+            .forEach(i -> Assertions.assertDoesNotThrow(() -> runTests("test " + i)));
+        IntStream
+            .range(0, SpamCheck.maxSentencesSaved * 2)
+            .forEach(i -> Assertions.assertDoesNotThrow(() -> runTests("test " + i)));
+
+        System.out.println("done!");
+    }
+
+
 }

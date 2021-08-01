@@ -178,12 +178,12 @@ public class SpamCheck {
             }
         }
 
-        lastMessages.add(saniMsg);
+        if (lastMessages.size() < maxSentencesSaved) lastMessages.add(saniMsg);
 
         // Spam found - Add message to the last spam messages
         if (cntDuplicates >= maxDuplicates) {
             // is Spam
-            if (!lastSpamMessages.contains(saniMsg))
+            if (lastSpamMessages.size() < maxSpamSaved && !lastSpamMessages.contains(saniMsg))
                 lastSpamMessages.add(saniMsg);
 
             return true;
