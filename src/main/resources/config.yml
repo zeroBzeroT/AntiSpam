@@ -11,7 +11,7 @@ min-message-length: 4
 sentences-saved-per-player: 3
 whitespace-frequency: 0.0625
 not-moved-check-enabled: false
-maximum-characters-per-minute: 225
+maximum-characters-per-minute: 300
 maximum-unicode-ranges: 4
 whisperCommands:
   - "tell"
