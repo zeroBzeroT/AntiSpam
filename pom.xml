@@ -6,7 +6,7 @@
 
   <groupId>org.zeroBzeroT</groupId>
   <artifactId>0b0t_AntiSpam</artifactId>
-  <version>1.11</version>
+  <version>1.12</version>
   <packaging>jar</packaging>
   <description>No chat until a block is run and check for spam via Levenshtein distance.</description>
 
@@ -63,13 +63,13 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
-      <version>5.7.2</version>
+      <version>5.8.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.vintage</groupId>
       <artifactId>junit-vintage-engine</artifactId>
-      <version>5.7.2</version>
+      <version>5.8.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -46,6 +46,9 @@ public class SpamCheck {
     // time at which the player is allowed to chat again
     private final ConcurrentHashMap<UUID, Long> momentNextChatAllowed = new ConcurrentHashMap<>();
 
+    // time at which the player is allowed to chat again
+    private final ConcurrentHashMap<UUID, Integer> shortMessageCount = new ConcurrentHashMap<>();
+
     // sanitizing message from chars that are from unicode ranges that are only used a few times in that message
     private UnicodeRanges unicodeRanges;
 
@@ -212,11 +215,28 @@ public class SpamCheck {
      * @param message
      * @return
      */
-    public boolean isNoBlanksSpam(String message) {
+    public boolean isNoBlanksSpam(UUID uuid, String message) {
         // assume that the end of the text corresponds to one whitespace (+1)
-        float whitespace = (message.length() - message.replaceAll(" ", "").length() + 1f);
+        float whitespaceCount = (message.length() - message.replaceAll(" ", "").length());
 
-        return (whitespace / message.length()) < whitespaceFrequency;
+        if (whitespaceCount < 2) {
+            // sentence has 2 or less whitespaces - temporary
+            // TODO: maybe add a bucket cooldown thing here instead of that hardcoded crap
+            shortMessageCount.putIfAbsent(uuid, 0);
+
+            Integer count = shortMessageCount.get(uuid);
+
+            if (count < 3) {
+                shortMessageCount.put(uuid, count + 1);
+            } else {
+                return true;
+            }
+        } else {
+            shortMessageCount.remove(uuid);
+        }
+
+        // Percentage of whitespace needed in long messages
+        return ((whitespaceCount + 1f) / message.length()) < whitespaceFrequency;
     }
 
     /**
@@ -269,9 +289,10 @@ public class SpamCheck {
     /**
      * Removes a player from
      *
-     * @param player
+     * @param uuid
      */
-    public void onPlayerLeave(UUID player) {
-        momentNextChatAllowed.remove(player);
+    public void onPlayerLeave(UUID uuid) {
+        momentNextChatAllowed.remove(uuid);
+        shortMessageCount.remove(uuid);
     }
 }
