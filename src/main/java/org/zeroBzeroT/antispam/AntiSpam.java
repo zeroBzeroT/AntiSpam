@@ -1,5 +1,6 @@
 package org.zeroBzeroT.antispam;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -33,6 +34,11 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
     private String messageSpamWhisper;
     private boolean notMovedCheckEnabled;
 
+    // accumulated message size
+    private long cumulatedMessageSize;
+
+    private boolean isSpam;
+
     @Override
     public void onEnable() {
         spamBotCheck = new SpamCheck(this);
@@ -62,6 +68,18 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
 
         this.getCommand("showspam").setExecutor(this);
         this.getCommand("movereload").setExecutor(this);
+
+        cumulatedMessageSize = 0;
+        isSpam = false;
+
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
+            int threshold = config.getInt("maximum-characters-per-minute") * Bukkit.getOnlinePlayers().size() / 2;
+            isSpam = cumulatedMessageSize > threshold;
+
+            log("isSpam", "Spam: " + isSpam + " Size: " + cumulatedMessageSize + " Threshold: " + threshold);
+
+            cumulatedMessageSize = 0;
+        }, 0L, 20L * 60);
     }
 
     @Override
@@ -91,7 +109,7 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("noPermissions")));
             return true;
         } else if (sender instanceof ConsoleCommandSender && cmd.getName().equalsIgnoreCase("showspam")) {
-            log("showspam", ChatColor.DARK_PURPLE + "Here comes the spam:");
+            log("showspam", ChatColor.DARK_PURPLE + "Here is the spam:");
 
             for (String oldSpam : new LinkedList<>(spamBotCheck.lastSpamMessages)) {
                 log("showspam", ChatColor.LIGHT_PURPLE + oldSpam);
@@ -99,7 +117,7 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
 
             return true;
         } else if (sender instanceof ConsoleCommandSender && cmd.getName().equalsIgnoreCase("showmessages")) {
-            log("showmessages", ChatColor.DARK_PURPLE + "Here comes the last messages:");
+            log("showmessages", ChatColor.DARK_PURPLE + "Here are the last messages:");
 
             for (String oldMessage : new LinkedList<>(spamBotCheck.lastMessages)) {
                 log("showmessages", ChatColor.LIGHT_PURPLE + oldMessage);
@@ -121,6 +139,7 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
 
     /**
      * flag player as "not moved" after killing
+     *
      * @param e
      */
     @EventHandler
@@ -133,6 +152,7 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
 
     /**
      * clean up plugin player data
+     *
      * @param event
      */
     @EventHandler
@@ -148,10 +168,13 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
 
     /**
      * chat spam check
+     *
      * @param event
      */
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onPlayerChat(AsyncPlayerChatEvent event) {
+        cumulatedMessageSize += event.getMessage().length();
+
         Player player = event.getPlayer();
         String message = event.getMessage();
 
@@ -163,6 +186,7 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
     /**
      * whisper spam check
      * TODO: add /r command which only has 1 param
+     *
      * @param event
      */
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -174,6 +198,8 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
             String[] messagePart = message.split(" ", 3);
 
             if (messagePart.length == 3) {
+                cumulatedMessageSize += event.getMessage().length();
+
                 if (isSpam(player, messagePart[2], true)) {
                     event.setCancelled(true);
                 }
@@ -183,6 +209,7 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
 
     /**
      * check if the player has moved over a block border
+     *
      * @param e
      */
     @EventHandler
@@ -202,13 +229,16 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
 
     /**
      * Checks if a message of a player is spam
+     *
      * @param player       sender
      * @param message      text message
      * @param isWhispering is private message
      * @return true, if the message is spam
      */
     private boolean isSpam(Player player, String message, boolean isWhispering) {
-        boolean isSpam = false;
+        // spam attacked? if not -> return
+        if (!isSpam)
+            return false;
 
         // Bot Whitelist (not for whispering)
         if (!isWhispering && isBot(player)) {
@@ -220,6 +250,7 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
             return true;
         }
 
+        boolean isSpam = false;
         String failedTest = "";
 
         if (spamBotCheck.isFloodSpam(player.getUniqueId(), message)) {

@@ -6,7 +6,7 @@
 
   <groupId>org.zeroBzeroT</groupId>
   <artifactId>0b0t_AntiSpam</artifactId>
-  <version>1.10</version>
+  <version>1.11</version>
   <packaging>jar</packaging>
   <description>No chat until a block is run and check for spam via Levenshtein distance.</description>
 
