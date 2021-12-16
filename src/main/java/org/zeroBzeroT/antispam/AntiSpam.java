@@ -77,7 +77,7 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
 
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
             // assume that only 10% of the players ever chat ;)
-            int threshold = config.getInt("maximum-characters-per-minute") * Bukkit.getOnlinePlayers().size() / 10;
+            int threshold = config.getInt("maximum-characters-per-minute") * Bukkit.getOnlinePlayers().size() / 5;
             isSpam = cumulatedMessageSize > threshold;
 
             log("isSpam", "Spam: " + isSpam + " Size: " + cumulatedMessageSize + " Threshold: " + threshold);
