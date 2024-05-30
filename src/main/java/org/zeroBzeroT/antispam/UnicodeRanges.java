@@ -3,6 +3,7 @@ package org.zeroBzeroT.antispam;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,13 +14,14 @@ import java.util.*;
 
 @SuppressWarnings("unchecked")
 public class UnicodeRanges {
+
+    @NotNull
     public static final List<Object> undefinedRange = Arrays.asList(0, 0, "undefined");
-    List<List<Object>> unicodeRanges;
 
-    public UnicodeRanges(Plugin plugin) throws IOException, InvalidConfigurationException {
+    final List<List<Object>> unicodeRanges;
 
+    public UnicodeRanges(@NotNull final Plugin plugin) throws IOException, InvalidConfigurationException {
         plugin.saveResource("unicode_ranges.yml", false);
-
         YamlConfiguration config = new YamlConfiguration();
 
         config.load(plugin.getDataFolder() + "/unicode_ranges.yml");
@@ -28,24 +30,24 @@ public class UnicodeRanges {
     }
 
     public UnicodeRanges() throws IOException, InvalidConfigurationException {
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("unicode_ranges.yml");
+        final YamlConfiguration config = new YamlConfiguration();
 
-        InputStreamReader streamReader = new InputStreamReader(Objects.requireNonNull(inputStream), StandardCharsets.UTF_8);
+        try (final InputStream inputStream = getClass().getClassLoader().getResourceAsStream("unicode_ranges.yml")) {
+            final InputStreamReader streamReader = new InputStreamReader(Objects.requireNonNull(inputStream), StandardCharsets.UTF_8);
+            final BufferedReader reader = new BufferedReader(streamReader);
 
-        BufferedReader reader = new BufferedReader(streamReader);
-
-        YamlConfiguration config = new YamlConfiguration();
-
-        config.load(reader);
+            config.load(reader);
+        }
 
         unicodeRanges = (List<List<Object>>) config.getList("ranges");
 
-
+        assert unicodeRanges != null;
         unicodeRanges.add(undefinedRange);
     }
 
-    public String sanitizeText(String text, int minimalPurgeLength) {
-        Map<List<Object>, Integer> count = countUnicodeRanges(text);
+    @NotNull
+    public String sanitizeText(@NotNull final String text, final int minimalPurgeLength) {
+        final Map<List<Object>, Integer> count = countUnicodeRanges(text);
 
         // get the range with the most chars
         Map.Entry<List<Object>, Integer> maxRange = null;
@@ -56,28 +58,27 @@ public class UnicodeRanges {
             }
         }
 
-        if (maxRange == null) {
+        if (maxRange == null)
             return "";
-        }
 
         // only remove the chars from other ranges if the text is long enough afterwards
-        if (maxRange.getValue() > minimalPurgeLength) {
-            StringBuilder newText = new StringBuilder();
-
-            for (int i = 0; i < text.length(); i++) {
-                int unicode = text.codePointAt(i);
-
-                if ((int) maxRange.getKey().get(0) <= unicode && unicode <= (int) maxRange.getKey().get(1)) {
-                    newText.append(text.charAt(i));
-                }
-            }
-
-            // return the text without chars from other ranges
-            return newText.toString();
+        if (maxRange.getValue() <= minimalPurgeLength) {
+            // return the old text if its not possible to remove chars
+            return text;
         }
 
-        // return the old text if its not possible to remove chars
-        return text;
+        final StringBuilder newText = new StringBuilder();
+
+        for (int i = 0; i < text.length(); i++) {
+            int unicode = text.codePointAt(i);
+
+            if ((int) maxRange.getKey().get(0) <= unicode && unicode <= (int) maxRange.getKey().get(1)) {
+                newText.append(text.charAt(i));
+            }
+        }
+
+        // return the text without chars from other ranges
+        return newText.toString();
     }
 
     /**
@@ -85,14 +86,15 @@ public class UnicodeRanges {
       * @param text
      * @return Map of unicode range and corresponding char count
      */
-    public Map<List<Object>, Integer> countUnicodeRanges(String text) {
-        Map<List<Object>, Integer> count = new HashMap<>();
+    @NotNull
+    public Map<List<Object>, Integer> countUnicodeRanges(@NotNull final String text) {
+        final Map<List<Object>, Integer> count = new HashMap<>();
 
         boolean found = false;
 
         for (int i = 0; i < text.length(); i++) {
-            for (List<Object> range : unicodeRanges) {
-                int unicode = text.codePointAt(i);
+            for (final List<Object> range : unicodeRanges) {
+                final int unicode = text.codePointAt(i);
 
                 if ((int) range.get(0) <= unicode && unicode <= (int) range.get(1)) {
                     if (count.containsKey(range)) {

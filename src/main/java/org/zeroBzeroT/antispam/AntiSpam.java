@@ -1,7 +1,12 @@
 package org.zeroBzeroT.antispam;
 
+import io.papermc.paper.event.player.AsyncChatEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -16,17 +21,22 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
+
+    @NotNull
     private static final Set<UUID> bots = new HashSet<>();
+
+    @NotNull
     private static final Set<String> whisperCommands = new HashSet<>();
+
+    @NotNull
     private final Set<UUID> notMoved = ConcurrentHashMap.newKeySet();
 
     FileConfiguration config;
@@ -69,8 +79,8 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(this, this);
 
-        this.getCommand("showspam").setExecutor(this);
-        this.getCommand("movereload").setExecutor(this);
+        Objects.requireNonNull(getCommand("showspam")).setExecutor(this);
+        Objects.requireNonNull(getCommand("movereload")).setExecutor(this);
 
         cumulatedMessageSize = 0;
         isSpam = false;
@@ -93,65 +103,65 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
 
             HandlerList.unregisterAll((JavaPlugin) this);
             HandlerList.unregisterAll((Listener) this);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
     }
 
-    @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (sender instanceof Player && cmd.getName().equalsIgnoreCase("movereload")) {
-            Player player = (Player) sender;
+    @NotNull
+    private static Component deserializeLegacy(@Nullable final String legacyMessage) {
+        assert legacyMessage != null;
+        return LegacyComponentSerializer.legacyAmpersand().deserialize(legacyMessage);
+    }
 
+    @Override
+    public boolean onCommand(@NotNull final CommandSender sender, @NotNull final Command cmd,
+                             @NotNull final String label, @NotNull final String @NotNull [] args) {
+        final String commandName = cmd.getName().toLowerCase();
+
+        if (sender instanceof final Player player && commandName.equals("movereload")) {
             if (player.hasPermission("move.reload")) {
                 reloadConfig();
-                player.sendMessage(
-                    ChatColor.translateAlternateColorCodes('&', getConfig().getString("reload-message")));
+                player.sendMessage(deserializeLegacy(getConfig().getString("reload-message")));
                 return true;
             }
-
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("noPermissions")));
-            return true;
-        } else if (sender instanceof ConsoleCommandSender && cmd.getName().equalsIgnoreCase("showspam")) {
-            log("showspam", ChatColor.DARK_PURPLE + "Here is the spam:");
-
-            for (String oldSpam : new LinkedList<>(spamBotCheck.lastSpamMessages)) {
-                log("showspam", ChatColor.LIGHT_PURPLE + oldSpam);
-            }
-
-            return true;
-        } else if (sender instanceof ConsoleCommandSender && cmd.getName().equalsIgnoreCase("showmessages")) {
-            log("showmessages", ChatColor.DARK_PURPLE + "Here are the last messages:");
-
-            for (String oldMessage : new LinkedList<>(spamBotCheck.lastMessages)) {
-                log("showmessages", ChatColor.LIGHT_PURPLE + oldMessage);
-            }
-
+            player.sendMessage(deserializeLegacy(getConfig().getString("noPermissions")));
             return true;
         }
-
+        if (sender instanceof ConsoleCommandSender) {
+            return switch (commandName) {
+                case "showspam" -> logMessages("showspam", spamBotCheck.lastSpamMessages);
+                case "showmessages" -> logMessages("showmessages", spamBotCheck.lastMessages);
+                default -> false;
+            };
+        }
         return false;
     }
 
-    @EventHandler
-    public void onPlayerJoinEvent(PlayerLoginEvent event) {
-        if (notMovedCheckEnabled) {
-            Player player = event.getPlayer();
-            notMovedAdd(player);
+    private static boolean logMessages(@NotNull final String module, @NotNull final LimitedSizeQueue<String> queuedMessages) {
+        log(module, Component.text("Here are the last messages:").color(NamedTextColor.DARK_PURPLE));
+
+        for (final String oldMessage : new LinkedList<>(queuedMessages)) {
+            log(module, Component.text(oldMessage).color(NamedTextColor.LIGHT_PURPLE));
         }
+        return true;
+    }
+
+    @EventHandler
+    public void onPlayerJoinEvent(@NotNull final PlayerLoginEvent event) {
+        if (notMovedCheckEnabled)
+            notMovedAdd(event.getPlayer());
     }
 
     /**
      * flag player as "not moved" after killing
      *
-     * @param e
+     * @param event
      */
     @EventHandler
-    public void onPlayerDeath(PlayerDeathEvent e) {
-        if (notMovedCheckEnabled) {
-            Player player = e.getEntity();
-            notMovedAdd(player);
-        }
+    public void onPlayerDeath(@NotNull final PlayerDeathEvent event) {
+        if (notMovedCheckEnabled)
+            notMovedAdd(event.getEntity());
     }
 
     /**
@@ -160,13 +170,13 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
      * @param event
      */
     @EventHandler
-    public void onPlayerLeaveEvent(PlayerQuitEvent event) {
-        if (notMovedCheckEnabled) {
-            notMoved.remove(event.getPlayer().getUniqueId());
-        }
+    public void onPlayerLeaveEvent(@NotNull final PlayerQuitEvent event) {
+        final UUID uuid = event.getPlayer().getUniqueId();
+        if (notMovedCheckEnabled)
+            notMoved.remove(uuid);
 
         spamBotCheck.setPlayerCount(getServer().getOnlinePlayers().size());
-        spamBotCheck.onPlayerLeave(event.getPlayer().getUniqueId());
+        spamBotCheck.onPlayerLeave(uuid);
     }
 
     /**
@@ -175,12 +185,12 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
      * @param event
      */
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-    public void onPlayerChat(AsyncPlayerChatEvent event) {
-        cumulatedMessageSize += event.getMessage().length();
+    public void onPlayerChat(@NotNull final AsyncChatEvent event) {
+        final String message = PlainTextComponentSerializer.plainText().serialize(event.message());
+        cumulatedMessageSize += message.length();
 
-        if (isSpam(event.getPlayer(), event.getMessage(), false)) {
+        if (isSpam(event.getPlayer(), message, false))
             event.setCancelled(true);
-        }
     }
 
     /**
@@ -190,38 +200,36 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
      * @param event
      */
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
-        String message = event.getMessage();
+    public void onPlayerCommandPreprocess(@NotNull final PlayerCommandPreprocessEvent event) {
+        final String message = event.getMessage();
 
-        if (whisperCommands.stream().anyMatch(cmd -> message.toLowerCase().startsWith("/" + cmd + " "))) {
-            String[] messagePart = message.split(" ", 3);
+        if (whisperCommands.stream().noneMatch(cmd -> message.toLowerCase().startsWith("/" + cmd + " "))) return;
+        final String[] messagePart = message.split(" ", 3);
 
-            if (messagePart.length == 3) {
-                cumulatedMessageSize += event.getMessage().length();
+        if (messagePart.length != 3) return;
+        cumulatedMessageSize += event.getMessage().length();
 
-                if (isSpam(event.getPlayer(), messagePart[2], true)) {
-                    event.setCancelled(true);
-                }
-            }
-        }
+        if (isSpam(event.getPlayer(), messagePart[2], true))
+            event.setCancelled(true);
     }
 
     /**
      * check if the player has moved over a block border
      *
-     * @param e
+     * @param event
      */
     @EventHandler
-    public void onPlayerMove(PlayerMoveEvent e) {
+    public void onPlayerMove(@NotNull final PlayerMoveEvent event) {
         if (!notMovedCheckEnabled)
             return;
 
-        if (e.getTo().getBlockX() == e.getFrom().getBlockX() && e.getTo().getBlockZ() == e.getFrom().getBlockZ())
+        final Location from = event.getFrom();
+        final Location to = event.getTo();
+
+        if (to.getBlockX() == from.getBlockX() && to.getBlockZ() == from.getBlockZ())
             return;
 
-        Player player = e.getPlayer();
-
-        notMoved.remove(e.getPlayer().getUniqueId());
+        notMoved.remove(event.getPlayer().getUniqueId());
     }
 
     /**
@@ -232,18 +240,17 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
      * @param isWhispering is private message
      * @return true, if the message is spam
      */
-    private boolean isSpam(Player player, String message, boolean isWhispering) {
+    private boolean isSpam(@NotNull final Player player, @NotNull final String message, final boolean isWhispering) {
         // spam attacked? if not -> return
         if (!isSpam)
             return false;
 
         // Bot Whitelist (not for whispering)
-        if (!isWhispering && isBot(player)) {
+        if (!isWhispering && isBot(player))
             return false;
-        }
 
         if (notMovedCheckEnabled && this.notMoved.contains(player.getUniqueId())) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', messageCannotTalk));
+            player.sendMessage(deserializeLegacy(messageCannotTalk));
             return true;
         }
 
@@ -273,10 +280,8 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
         }
 
         if (isSpam) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', isWhispering ? messageSpamWhisper : messageSpamTalk));
-
+            player.sendMessage(deserializeLegacy(isWhispering ? messageSpamWhisper : messageSpamTalk));
             log("Failed " + failedTest, player.getName() + " " + (isWhispering ? "whispering" : "message") + " has been discarded.");
-
             return true;
         }
 
@@ -289,7 +294,7 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
      * @param player
      * @return
      */
-    private boolean isBot(Player player) {
+    private boolean isBot(@NotNull final Player player) {
         return isBot(player.getUniqueId());
     }
 
@@ -299,7 +304,7 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
      * @param uuid
      * @return
      */
-    private boolean isBot(UUID uuid) {
+    private boolean isBot(@NotNull final UUID uuid) {
         return bots.contains(uuid);
     }
 
@@ -308,15 +313,14 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
      *
      * @param player
      */
-    private void notMovedAdd(Player player) {
+    private void notMovedAdd(@NotNull final Player player) {
         if (bots.contains(player.getUniqueId())) {
             log("Bot", player.getName());
             return;
         }
 
-        if (!player.hasPermission("move.bypass")) {
+        if (!player.hasPermission("move.bypass"))
             this.notMoved.add(player.getUniqueId());
-        }
     }
 
     /**
@@ -325,7 +329,19 @@ public class AntiSpam extends JavaPlugin implements Listener, CommandExecutor {
      * @param module
      * @param message
      */
-    public void log(String module, String message) {
-        getLogger().info("§a[" + module + "] §e" + message + "§r");
+    public static void log(@NotNull final String module, @NotNull final Component message) {
+        final Component prefix = Component.text("[" + module + "]").color(NamedTextColor.GREEN);
+        final Component fullMessage = prefix.append(message);
+        Bukkit.getConsoleSender().sendMessage(fullMessage);
+    }
+
+    /**
+     * print a log message, but yellow by default
+     *
+     * @param module
+     * @param message
+     */
+    public static void log(@NotNull final String module, @NotNull final String message) {
+        log(module, Component.text(message).color(NamedTextColor.YELLOW));
     }
 }
