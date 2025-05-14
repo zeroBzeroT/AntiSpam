@@ -1,6 +1,9 @@
 # AntiSpam
 [![discord](https://img.shields.io/discord/843551077759844362?logo=discord)](https://discord.gg/7tW8ZAtGr5)
 [![reddit](https://img.shields.io/reddit/subreddit-subscribers/0b0t)](https://old.reddit.com/r/0b0t/)
+
+This is an unfinished project. Feel free to use the code.
+
 ## Checks
 - recurring (levenshtein distance)
     - old spam
